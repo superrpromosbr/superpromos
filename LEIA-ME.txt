@@ -1,0 +1,21 @@
+LEIA PRIMEIRO: o passo a passo completo está no PDF "Guia-Super-Promos-BR.pdf".
+
+RESUMO
+- Hospedagem recomendada: GitHub + Cloudflare Pages (grátis) + domínio no Registro.br (R$ 40/ano).
+  Build command: node build.js  |  Build output directory: /
+- Postar ofertas: abra seusite.com.br/admin.html, escolha o modo (manual ou API),
+  salve a oferta, clique "Baixar products.js" e envie para assets/js/ no GitHub.
+- Modo API: precisa de 10 vendas em 30 dias e das variáveis CREATORS_CLIENT_ID e
+  CREATORS_CLIENT_SECRET na Cloudflare (o modo API não funciona na Hostinger).
+- O arquivo .htaccess só é usado se um dia você trocar para Hostinger/Apache.
+
+SUPER PROMOS BR — SITE VITRINE DE OFERTAS AMAZON
+================================================
+
+COMO FUNCIONA
+- Você posta no Discord/Instagram o link do SEU site:  https://seudominio.com.br/p/nome-do-produto
+- A pessoa abre a página do produto no seu site e clica em "Comprar na Amazon".
+- Só então vai para a Amazon, já com a sua tag (zerumigo0d-20).
+- IMPORTANTE: o site NÃO pula sozinho para a Amazon. A regra da Amazon diz que
+  "link de redirecionamento" automático (sem clique) NÃO gera comissão. O clique no botão é obrigatório.
+

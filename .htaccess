@@ -1,0 +1,11 @@
+# Para hospedagens Apache/LiteSpeed (ex.: Hostinger). A Cloudflare Pages ignora este arquivo.
+DirectoryIndex index.html
+ErrorDocument 404 /404.html
+Options -Indexes
+# Força HTTPS
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+# /p/produto (sem barra) -> /p/produto/
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^p/([a-z0-9-]+)$ /p/$1/ [L,R=301]

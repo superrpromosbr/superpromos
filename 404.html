@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Página não encontrada | Super Promos BR</title>
+<script>
+  // Se alguém abrir /p/nome-do-produto e a página ainda não foi gerada,
+  // leva para a página do produto dentro do próprio site (sem pular direto para a Amazon).
+  (function () {
+    var m = location.pathname.match(/\/p\/([a-z0-9-]+)\/?$/i);
+    if (m) location.replace("/produto.html?id=" + encodeURIComponent(m[1].toLowerCase()));
+  })();
+</script>
+<link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body data-base="/" data-pagina="404">
+<header class="topo" id="topo"></header>
+<main class="container">
+  <div class="texto" style="text-align:center">
+    <h1>Ops! Página não encontrada 😕</h1>
+    <p>Essa oferta pode ter acabado ou o link está errado.</p>
+    <p><a class="btn btn-amazon" style="max-width:280px;margin:auto" href="/index.html">Ver todas as ofertas</a></p>
+  </div>
+</main>
+<footer class="rodape" id="rodape"></footer>
+<script src="/assets/js/config.js"></script>
+<script src="/assets/js/products.js"></script>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

@@ -1,102 +1,199 @@
-/* =========================================================
-   LISTA DE PRODUTOS
-   Dica: use o painel admin.html para gerar este arquivo sem
-   precisar editar à mão.
-
-   Campos:
-   id          -> nome curto do link (vira seusite.com.br/p/ID). Só letras minúsculas, números e hífen.
-   titulo      -> nome do produto
-   categoria   -> uma das categorias (aparece nos filtros)
-   asin        -> código do produto na Amazon (ex.: B0FMFTWHJJ). O link é montado com sua tag.
-   url         -> (opcional) use no lugar do ASIN um link completo da Amazon; a tag é adicionada sozinha.
-   imagem      -> (opcional) link da imagem (SiteStripe da Amazon ou sua própria foto)
-   descricao   -> seu texto sobre o produto (conteúdo original seu)
-   destaque    -> true para aparecer em "Ofertas em destaque"
-   selo        -> (opcional) etiqueta curta: "Mais vendido", "Oferta", "-30%"
-   cupom       -> (opcional) código de cupom
-   data        -> data em que você publicou (AAAA-MM-DD)
-
-   PREÇOS: a Amazon só permite mostrar preço se ele vier da API oficial
-   ou se você atualizar com data/hora. Por segurança, o site mostra
-   "Ver preço na Amazon". Se quiser exibir, preencha preco, precoAntigo e
-   atualizadoEm ("2026-11-24 14:30") — o aviso exigido aparece sozinho.
-   ========================================================= */
+/* Lista de ofertas — atualizada em 26/11/2026 15:02 (horário de Brasília). Edite pelo painel admin.html. */
 window.PRODUTOS = [
   {
-    id: "fone-bluetooth",
-    titulo: "Fones de ouvido Bluetooth com cancelamento de ruído",
-    categoria: "Eletrônicos",
-    url: "https://www.amazon.com.br/s?k=fone+bluetooth+cancelamento+de+ruido",
-    imagem: "",
-    descricao: "Produto de EXEMPLO. Substitua por um produto real no painel admin. Fones sem fio com boa bateria e cancelamento de ruído para trabalhar, estudar ou viajar.",
-    destaque: true,
-    selo: "Exemplo",
-    data: "2026-11-24"
+    "id": "echo-dot-alexa",
+    "titulo": "Echo Dot com Alexa (5ª geração) — smart speaker",
+    "categoria": "Eletrônicos",
+    "url": "https://link.amazon/B03VQRE3y",
+    "imagem": "https://m.media-amazon.com/images/I/61evEYmxBZL._AC_SL500_.jpg",
+    "descricao": "Controle luzes, músicas e lembretes só com a voz. Um dos mais vendidos da Amazon e com desconto de Black Friday.",
+    "destaque": true,
+    "selo": "-55%",
+    "preco": "R$ 289,00",
+    "precoAntigo": "R$ 649,00",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "smartwatch",
-    titulo: "Smartwatch com monitor de batimentos e notificações",
-    categoria: "Eletrônicos",
-    url: "https://www.amazon.com.br/s?k=smartwatch",
-    descricao: "Produto de EXEMPLO. Relógio inteligente para acompanhar treinos, sono e notificações do celular.",
-    destaque: true,
-    selo: "Exemplo",
-    data: "2026-11-24"
+    "id": "fire-tv-stick-hd",
+    "titulo": "Fire TV Stick HD com controle por voz Alexa",
+    "categoria": "Eletrônicos",
+    "url": "https://link.amazon/B05svJKzR",
+    "imagem": "https://m.media-amazon.com/images/I/61EwP1HwXlL._AC_SL500_.jpg",
+    "descricao": "Transforma qualquer TV com HDMI em Smart TV: Netflix, Prime Video, YouTube e mais.",
+    "destaque": true,
+    "selo": "-54%",
+    "preco": "R$ 220,50",
+    "precoAntigo": "R$ 479,00",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "air-fryer",
-    titulo: "Air Fryer 4L — fritadeira elétrica sem óleo",
-    categoria: "Casa e Cozinha",
-    url: "https://www.amazon.com.br/s?k=air+fryer",
-    descricao: "Produto de EXEMPLO. Prepare batata, frango e pão de queijo sem óleo e em poucos minutos.",
-    destaque: true,
-    selo: "Exemplo",
-    data: "2026-11-24"
+    "id": "galaxy-tab-s10-lite",
+    "titulo": "Samsung Galaxy Tab S10 Lite 128GB, tela 10.9\"",
+    "categoria": "Informática",
+    "url": "https://link.amazon/B04sQADNE",
+    "imagem": "https://m.media-amazon.com/images/I/51OCtiSoKWL._AC_SL500_.jpg",
+    "descricao": "Tablet ótimo para estudar, ver séries e anotar. Tela grande e 128GB de espaço.",
+    "destaque": true,
+    "selo": "-36%",
+    "preco": "R$ 1.985,46",
+    "precoAntigo": "R$ 3.149,00",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "kit-canetas",
-    titulo: "Kit de canetas coloridas ponta fina — 24 cores",
-    categoria: "Papelaria",
-    url: "https://www.amazon.com.br/s?k=kit+canetas+coloridas+ponta+fina",
-    descricao: "Produto de EXEMPLO. Ideal para cadernos, planners e lettering.",
-    destaque: false,
-    data: "2026-11-24"
+    "id": "controle-dualsense-ps5",
+    "titulo": "Controle sem fio DualSense PS5 — Midnight Black",
+    "categoria": "Games",
+    "url": "https://link.amazon/B04MxiJ6y",
+    "imagem": "https://m.media-amazon.com/images/I/61GNEp3auhL._AC_SL500_.jpg",
+    "descricao": "Controle oficial do PlayStation 5 com resposta tátil e gatilhos adaptáveis.",
+    "destaque": true,
+    "selo": "-20%",
+    "preco": "R$ 399,00",
+    "precoAntigo": "R$ 499,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "mouse-gamer",
-    titulo: "Mouse gamer RGB com 6 botões programáveis",
-    categoria: "Games",
-    url: "https://www.amazon.com.br/s?k=mouse+gamer",
-    descricao: "Produto de EXEMPLO. Sensor preciso, iluminação RGB e botões laterais para jogos.",
-    destaque: false,
-    cupom: "",
-    data: "2026-11-24"
+    "id": "base-carregamento-dualsense",
+    "titulo": "Base de carregamento oficial DualSense (PS5)",
+    "categoria": "Games",
+    "url": "https://link.amazon/B0gpuFmmb",
+    "imagem": "https://m.media-amazon.com/images/I/41y-G-g+dVL._AC_SL500_.jpg",
+    "descricao": "Carrega dois controles ao mesmo tempo, sem ocupar as portas USB do console.",
+    "destaque": false,
+    "selo": "-33%",
+    "preco": "R$ 165,90",
+    "precoAntigo": "R$ 249,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "garrafa-termica",
-    titulo: "Garrafa térmica inox 1L — mantém gelado por 24h",
-    categoria: "Esporte e Lazer",
-    url: "https://www.amazon.com.br/s?k=garrafa+termica+inox",
-    descricao: "Produto de EXEMPLO. Garrafa de aço inox que mantém a bebida gelada ou quente por horas.",
-    destaque: false,
-    data: "2026-11-24"
+    "id": "airfryer-philips-walita",
+    "titulo": "Airfryer Philips Walita Série 1000 XL",
+    "categoria": "Casa e Cozinha",
+    "url": "https://link.amazon/B070CtRgI",
+    "imagem": "https://m.media-amazon.com/images/I/510Uj5C7LdL._AC_SL500_.jpg",
+    "descricao": "Fritadeira sem óleo de cesto grande, ideal para a família toda. Quase metade do preço.",
+    "destaque": true,
+    "selo": "-46%",
+    "preco": "R$ 296,65",
+    "precoAntigo": "R$ 549,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "kindle",
-    titulo: "Leitor de livros digitais (e-reader)",
-    categoria: "Livros",
-    url: "https://www.amazon.com.br/s?k=kindle",
-    descricao: "Produto de EXEMPLO. Tela que não cansa a vista e bateria que dura semanas.",
-    destaque: false,
-    data: "2026-11-24"
+    "id": "copo-stanley-quencher",
+    "titulo": "Copo Stanley Quencher 1,18L — Cream",
+    "categoria": "Casa e Cozinha",
+    "url": "https://link.amazon/B0bSyosxV",
+    "imagem": "https://m.media-amazon.com/images/I/41D8P06OeqL._AC_SL500_.jpg",
+    "descricao": "O famoso copo térmico com alça e canudo: mantém a bebida gelada por horas.",
+    "destaque": true,
+    "selo": "-55%",
+    "preco": "R$ 160,20",
+    "precoAntigo": "R$ 359,00",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   },
   {
-    id: "kit-skincare",
-    titulo: "Kit skincare — limpeza, hidratação e protetor",
-    categoria: "Beleza",
-    url: "https://www.amazon.com.br/s?k=kit+skincare",
-    descricao: "Produto de EXEMPLO. Rotina completa de cuidados com a pele.",
-    destaque: false,
-    data: "2026-11-24"
+    "id": "sanduicheira-cadence",
+    "titulo": "Sanduicheira elétrica Cadence Click (127V)",
+    "categoria": "Casa e Cozinha",
+    "url": "https://link.amazon/B01KavYan",
+    "imagem": "https://m.media-amazon.com/images/I/51UxR8FHe-L._AC_SL500_.jpg",
+    "descricao": "Prática para o café da manhã e lanches rápidos. Atenção: modelo 127V.",
+    "destaque": false,
+    "selo": "-53%",
+    "preco": "R$ 75,00",
+    "precoAntigo": "R$ 159,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "suporte-monitor-elg",
+    "titulo": "Suporte articulado ELG para monitor 17\" a 35\"",
+    "categoria": "Informática",
+    "url": "https://link.amazon/B05A8xubM",
+    "imagem": "https://m.media-amazon.com/images/I/61-TzEg09KL._AC_SL500_.jpg",
+    "descricao": "Libera espaço na mesa e deixa o monitor na altura certa para a postura.",
+    "destaque": false,
+    "selo": "-55%",
+    "preco": "R$ 99,99",
+    "precoAntigo": "R$ 219,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "papel-sulfite-chamex",
+    "titulo": "Papel sulfite Chamex A4 75g — 500 folhas",
+    "categoria": "Papelaria",
+    "url": "https://link.amazon/B08mzLaBd",
+    "imagem": "https://m.media-amazon.com/images/I/61wJxH8y1DL._AC_SL500_.jpg",
+    "descricao": "O papel A4 mais vendido do Brasil, para impressora, escola e escritório.",
+    "destaque": false,
+    "selo": "-8%",
+    "preco": "R$ 32,90",
+    "precoAntigo": "R$ 35,88",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "caneta-pentel-energel",
+    "titulo": "Caneta gel Pentel Energel X 0.5mm — preta",
+    "categoria": "Papelaria",
+    "url": "https://link.amazon/B0btMlcxB",
+    "imagem": "https://m.media-amazon.com/images/I/51nXMn5alFL._AC_SL500_.jpg",
+    "descricao": "Escrita macia e que seca rápido, não borra. Queridinha para anotações.",
+    "destaque": false,
+    "selo": "-40%",
+    "preco": "R$ 8,64",
+    "precoAntigo": "R$ 14,48",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "lapis-cor-faber-24",
+    "titulo": "Lápis de cor Faber-Castell 24 cores + 4 bicolor",
+    "categoria": "Papelaria",
+    "url": "https://link.amazon/B0iJ8O9ci",
+    "imagem": "https://m.media-amazon.com/images/I/71-2eDnKH7L._AC_SL500_.jpg",
+    "descricao": "Kit completo para escola e desenho, da marca mais confiável do Brasil.",
+    "destaque": false,
+    "selo": "-31%",
+    "preco": "R$ 28,50",
+    "precoAntigo": "R$ 41,74",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "kit-80-canetas-marcador",
+    "titulo": "Kit 80 canetas marcadoras ponta dupla coloridas",
+    "categoria": "Papelaria",
+    "url": "https://link.amazon/B06mP6drF",
+    "imagem": "https://m.media-amazon.com/images/I/81ROHWxRCzL._AC_SL500_.jpg",
+    "descricao": "Ponta fina e grossa em cada caneta: ótimo para desenho, lettering e planners.",
+    "destaque": false,
+    "selo": "-26%",
+    "preco": "R$ 21,99",
+    "precoAntigo": "R$ 29,99",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
+  },
+  {
+    "id": "oleo-elseve-loreal",
+    "titulo": "Óleo Extraordinário L'Oréal Elseve — finalizador",
+    "categoria": "Beleza",
+    "url": "https://link.amazon/B0b9JlixP",
+    "imagem": "https://m.media-amazon.com/images/I/61tkhebgcnL._AC_SL500_.jpg",
+    "descricao": "Finalizador para cabelos com brilho e menos frizz. Mais da metade de desconto.",
+    "destaque": false,
+    "selo": "-59%",
+    "preco": "R$ 19,99",
+    "precoAntigo": "R$ 49,90",
+    "atualizadoEm": "2026-11-26T18:02:00.000Z",
+    "data": "2026-11-26"
   }
 ];

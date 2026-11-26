@@ -175,7 +175,7 @@
   function slug(t){ return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50).replace(/-$/,""); }
   function esc(s){ return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function asinDe(link){ var m = link.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/i); return m ? m[1].toUpperCase() : ""; }
-  function linkValido(l){ return /^https?:\/\/([a-z0-9-]+\.)*(amazon\.com\.br|amzn\.to)\//i.test(l); }
+  function linkValido(l){ return /^https?:\/\/([a-z0-9-]+\.)*(amazon\.com\.br|amzn\.to|link\.amazon)\//i.test(l); }
   function idUnico(base, ignorar){ var id = base || "oferta", n = 2; while (lista.some(function(p,i){ return p.id === id && i !== ignorar; })) id = base + "-" + (n++); return id; }
 
   function desenhar(){
@@ -220,7 +220,7 @@
   $("form").addEventListener("submit", function(e){
     e.preventDefault();
     var link = $("f-link").value.trim();
-    if (!linkValido(link)) { alert("Cole um link da Amazon Brasil (amazon.com.br ou amzn.to)."); return; }
+    if (!linkValido(link)) { alert("Cole um link da Amazon Brasil (amazon.com.br, amzn.to ou link.amazon)."); return; }
     var titulo = $("f-titulo").value.trim();
     var asin = asinDe(link);
     var antigo = editando !== null ? lista[editando] : {};

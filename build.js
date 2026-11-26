@@ -13,6 +13,13 @@ const path = require("path");
 const vm = require("vm");
 
 const raiz = __dirname;
+
+// Garante que as imagens estejam em assets/img (caso tenham sido enviadas soltas na raiz)
+fs.mkdirSync(path.join(raiz, "assets/img"), { recursive: true });
+for (const f of ["logo.png", "logo.svg", "og-padrao.png"]) {
+  const solto = path.join(raiz, f), certo = path.join(raiz, "assets/img", f);
+  if (fs.existsSync(solto) && !fs.existsSync(certo)) fs.copyFileSync(solto, certo);
+}
 const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(raiz, "assets/js/config.js"), "utf8"), ctx);

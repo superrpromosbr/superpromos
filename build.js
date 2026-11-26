@@ -29,6 +29,14 @@ const P = ctx.window.PRODUTOS || [];
 const url = (S.url || "").replace(/\/$/, "");
 
 const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Versão nos links de CSS/JS: força o navegador a baixar a lista nova a cada publicação
+const versao = Date.now().toString(36);
+for (const f of ["index.html", "produto.html", "404.html", "admin.html", "sobre.html", "privacidade.html", "termos.html"]) {
+  const arq = path.join(raiz, f);
+  if (!fs.existsSync(arq)) continue;
+  const html = fs.readFileSync(arq, "utf8").replace(/(assets\/(?:js|css)\/[a-z-]+\.(?:js|css))(\?v=[a-z0-9]+)?"/g, `$1?v=${versao}"`);
+  fs.writeFileSync(arq, html);
+}
 const modelo = fs.readFileSync(path.join(raiz, "produto.html"), "utf8");
 
 // limpa páginas antigas (produtos removidos)

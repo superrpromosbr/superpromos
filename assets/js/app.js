@@ -7,6 +7,18 @@
   var PAGINA = document.body.getAttribute("data-pagina") || "";
   var AVISO_PRECO = "Os preços e a disponibilidade dos produtos estão corretos na data/horário indicados e estão sujeitos a alterações. Qualquer informação de preço e disponibilidade exibida na Amazon no momento da compra será aplicada à compra deste produto.";
 
+  /* ---------- Lojas (Amazon e Mercado Livre) ---------- */
+  var LOJAS = {
+    amazon: { nome: "Amazon", site: "Amazon.com.br", na: "na Amazon", da: "da Amazon", publi: "#publi · link de associado Amazon" },
+    mercadolivre: { nome: "Mercado Livre", site: "mercadolivre.com.br", na: "no Mercado Livre", da: "do Mercado Livre", publi: "#publi · link de afiliado Mercado Livre" }
+  };
+  function lojaDe(p) {
+    if (p.loja && LOJAS[p.loja]) return p.loja;
+    try { if (/(^|\.)mercadoli(vre|bre)\.com(\.br)?$/i.test(new URL(p.url).hostname)) return "mercadolivre"; } catch (e) {}
+    return "amazon";
+  }
+  function L(p) { return LOJAS[lojaDe(p)]; }
+
   var EMOJI = {
     "Eletrônicos": "🎧", "Casa e Cozinha": "🍳", "Papelaria": "✏️", "Games": "🎮",
     "Esporte e Lazer": "🏃", "Livros": "📚", "Beleza": "💄", "Moda": "👟",
@@ -48,6 +60,11 @@
   }
 
   /* ---------- Links ---------- */
+  /* Link de afiliado da loja. Mercado Livre: o link é usado exatamente como foi gerado (regra 1.8 dos Termos). */
+  function linkLoja(p) {
+    if (lojaDe(p) === "mercadolivre") return p.url || "";
+    return linkAmazon(p);
+  }
   function linkAmazon(p) {
     if (p.linkApi) return p.linkApi; // link oficial devolvido pela API (não editar)
     var tag = S.tagAmazon;
@@ -103,16 +120,20 @@
       return '<div class="preco">' + esc(p.preco) + "</div>" +
         (grande ? "" : '<div class="hora-preco" title="' + esc(AVISO_PRECO) + '">em ' + fmtData(d) + " ⓘ</div>");
     }
-    return '<span class="ver-preco">' + (grande ? "Confira o preço atualizado na Amazon" : "Ver preço na Amazon") + "</span>";
+    return '<span class="ver-preco">' + (grande ? "Confira o preço atualizado " + L(p).na : "Ver preço " + L(p).na) + "</span>";
   }
 
+  /* A foto vem do site da loja e leva direto ao produto na loja (como a imagem de associado),
+     com o nome da loja visível. O texto leva à página da oferta aqui no site. */
   function card(p) {
-    return '<a class="card" href="' + linkInterno(p) + '">' +
-      '<div class="foto">' + foto(p) + "</div>" +
-      '<div class="info"><span class="cat">' + esc(p.categoria || "Ofertas") + "</span>" +
+    var l = L(p);
+    return '<div class="card">' +
+      '<a class="foto" href="' + esc(linkLoja(p)) + '" target="_blank" rel="sponsored noopener" title="Ver produto ' + esc(l.na) + '" aria-label="Ver ' + esc(p.titulo) + " " + esc(l.na) + '">' +
+      '<span class="selo-loja">' + esc(l.nome) + "</span>" + foto(p) + "</a>" +
+      '<a class="info" href="' + linkInterno(p) + '"><span class="cat">' + esc(p.categoria || "Ofertas") + "</span>" +
       "<h3>" + esc(p.titulo) + "</h3>" +
       '<div class="rodape-card"><div>' + blocoPreco(p) + '</div><span class="seta">›</span></div>' +
-      "</div></a>";
+      "</a></div>";
   }
 
   /* ---------- Topo e rodapé ---------- */
@@ -144,13 +165,16 @@
     if (S.emailContato) redes += '<a href="mailto:' + esc(S.emailContato) + '">' + esc(S.emailContato) + "</a>";
     el.innerHTML =
       '<div class="container"><div class="colunas">' +
-      "<div><h4>" + esc(S.nome) + "</h4><p>" + esc(S.slogan) + ". Selecionamos produtos e você finaliza a compra com segurança no site da Amazon.</p></div>" +
+      "<div><h4>" + esc(S.nome) + "</h4><p>" + esc(S.slogan) + ". Selecionamos produtos e você finaliza a compra com segurança no site oficial da loja (Amazon ou Mercado Livre).</p></div>" +
       '<div><h4>Institucional</h4><a href="' + BASE + 'sobre.html">Sobre nós</a><a href="' + BASE + 'privacidade.html">Política de Privacidade</a><a href="' + BASE + 'termos.html">Termos de Uso</a></div>' +
       "<div><h4>Siga a gente</h4>" + redes + "</div>" +
       '</div><div class="divulgacao">' +
-      "<strong>Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas.</strong> " +
+      "<strong>#publi — Este site contém links de afiliado. Como participante do Programa de Associados da Amazon, sou remunerado pelas compras qualificadas efetuadas. " +
+      "Também participo do Programa de Afiliados e Criadores do Mercado Livre e posso receber comissão pelas compras feitas pelos links.</strong> " +
+      "Você não paga nada a mais por isso. Cada botão mostra em qual loja a compra é feita; preço, estoque, frete e condições são definidos pela loja e podem mudar a qualquer momento. " +
       AVISO_PRECO + " " +
-      "Amazon, Amazon.com.br e o logotipo da Amazon são marcas comerciais da Amazon.com, Inc. ou de suas afiliadas. As demais marcas pertencem aos seus respectivos donos. " +
+      "Este site não é oficial, não é operado nem patrocinado pela Amazon ou pelo Mercado Livre. " +
+      "Amazon, Amazon.com.br e o logotipo da Amazon são marcas comerciais da Amazon.com, Inc. ou de suas afiliadas. Mercado Livre é marca de seus respectivos titulares. As demais marcas pertencem aos seus respectivos donos. " +
       "<br>© " + new Date().getFullYear() + " " + esc(S.nome) + ". Todos os direitos reservados." +
       "</div></div>";
   }
@@ -219,19 +243,19 @@
       : "Preço e estoque podem mudar a qualquer momento.";
 
     document.getElementById("migalhas").innerHTML =
-      '<a href="' + BASE + 'index.html">Início</a> › <a href="' + BASE + "index.html?cat=" + encodeURIComponent(cat) + '#todas">' + esc(cat) + "</a> › Amazon";
+      '<a href="' + BASE + 'index.html">Início</a> › <a href="' + BASE + "index.html?cat=" + encodeURIComponent(cat) + '#todas">' + esc(cat) + "</a> › " + esc(L(p).nome);
 
     alvo.innerHTML =
-      '<div class="galeria">' + foto(p) + "</div>" +
+      '<a class="galeria" href="' + esc(linkLoja(p)) + '" target="_blank" rel="sponsored noopener" title="Ver produto ' + esc(L(p).na) + '">' + '<span class="selo-loja">' + esc(L(p).nome) + "</span>" + foto(p) + "</a>" +
       "<div>" +
-      '<span class="tag-parceria">#publi · link de associado</span>' +
+      '<span class="tag-parceria">' + esc(L(p).publi) + "</span>" +
       "<h1>" + esc(p.titulo) + "</h1>" +
-      '<span class="loja">Compra feita no site da <b>Amazon.com.br</b></span>' +
+      '<span class="loja">Compra feita no site ' + esc(L(p).da) + " <b>(" + esc(L(p).site) + ")</b></span>" +
       '<div class="caixa-preco">' + blocoPreco(p, true) + '<div class="aviso-preco">' + avisoPreco + "</div></div>" +
       (p.cupom ? '<div class="cupom"><span>Cupom:</span><code>' + esc(p.cupom) + '</code><button class="btn btn-sec" data-copiar="' + esc(p.cupom) + '">Copiar</button></div>' : "") +
       (limparDescricao(p.descricao) ? '<p class="descricao">' + esc(limparDescricao(p.descricao)) + "</p>" : "") +
-      '<a class="btn btn-amazon" href="' + esc(linkAmazon(p)) + '" target="_blank" rel="sponsored noopener">Comprar na Amazon →</a>' +
-      '<p class="seguro">🔒 Você finaliza a compra com segurança no site oficial da Amazon.</p>' +
+      '<a class="btn btn-amazon" href="' + esc(linkLoja(p)) + '" target="_blank" rel="sponsored noopener">Comprar ' + esc(L(p).na) + " →</a>" +
+      '<p class="seguro">🔒 Você finaliza a compra com segurança no site oficial ' + esc(L(p).da) + ".</p>" +
       '<div class="compartilhar">' +
       '<button class="btn btn-sec" data-copiar="' + esc(linkPublico(p)) + '">🔗 Copiar link</button>' +
       '<a class="btn btn-sec" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(p.titulo + " " + linkPublico(p)) + '">💬 WhatsApp</a>' +
@@ -280,5 +304,5 @@
     if (P.some(function (p) { return p.api; })) renderizar();
   });
 
-  window.SuperPromos = { enderecoSite: enderecoSite, linkAmazon: linkAmazon, toast: toast, precoValido: precoValido, fmtData: fmtData, lerData: lerData };
+  window.SuperPromos = { enderecoSite: enderecoSite, linkAmazon: linkAmazon, linkLoja: linkLoja, lojaDe: lojaDe, toast: toast, precoValido: precoValido, fmtData: fmtData, lerData: lerData };
 })();

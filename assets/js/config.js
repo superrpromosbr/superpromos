@@ -3,7 +3,7 @@
    ========================================================= */
 window.SITE = {
   nome: "Super Promos BR",
-  slogan: "As melhores ofertas da Amazon, escolhidas a dedo",
+  slogan: "Ofertas da Amazon e do Mercado Livre, escolhidas a dedo",
   // Endereço final do site (troque quando tiver o domínio). Sem barra no final.
   url: "https://superrpromosbr.com.br",
   // Seu ID de Associado Amazon (tag). Todo link para a Amazon recebe essa tag.

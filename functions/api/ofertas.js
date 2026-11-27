@@ -8,8 +8,22 @@
     - Bindings: KV namespace com o nome de variável OFERTAS
     - Variables and Secrets: ADMIN_SENHA (tipo Secret) = senha do painel
 */
-const CAMPOS = ["id", "titulo", "categoria", "asin", "url", "imagem", "descricao", "destaque", "selo", "cupom",
-  "preco", "precoAntigo", "atualizadoEm", "data", "api", "tituloFixo"];
+// Sem preço digitado, sem selo de desconto (regras do Programa de Associados)
+const CAMPOS = ["id", "titulo", "categoria", "asin", "url", "imagem", "descricao", "destaque", "cupom",
+  "data", "api", "tituloFixo"];
+const PROIBIDO = /zoom|menor pre[çc]o|lojas comparadas|\d+\s*%\s*off|-\s*\d+\s*%/i;
+function limparDescricao(t) {
+  if (!t) return "";
+  return String(t).split(/(?<=[.!?])\s+/).filter((f) => !PROIBIDO.test(f)).join(" ").trim();
+}
+function sanear(lista) {
+  return (lista || []).map((p) => {
+    const o = {};
+    for (const c of CAMPOS) if (p[c] !== undefined && p[c] !== null && p[c] !== "") o[c] = p[c];
+    if (o.descricao) { o.descricao = limparDescricao(o.descricao); if (!o.descricao) delete o.descricao; }
+    return o;
+  });
+}
 
 function json(dados, status) {
   return new Response(JSON.stringify(dados), {
@@ -47,7 +61,7 @@ function limpar(lista) {
 export async function onRequestGet({ env }) {
   if (!env.OFERTAS) return json({ produtos: null, configurado: false });
   const [v, quando] = await Promise.all([env.OFERTAS.get("produtos"), env.OFERTAS.get("atualizado")]);
-  return json({ produtos: v ? JSON.parse(v) : null, atualizado: quando, configurado: !!env.ADMIN_SENHA });
+  return json({ produtos: v ? sanear(JSON.parse(v)) : null, atualizado: quando, configurado: !!env.ADMIN_SENHA });
 }
 
 export async function onRequestPost({ request, env }) {
@@ -60,7 +74,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const texto = await request.text();
     if (texto.length > 1500000) throw new Error("Lista grande demais.");
-    lista = limpar(JSON.parse(texto));
+    lista = sanear(limpar(JSON.parse(texto)));
   } catch (e) {
     return json({ erro: String(e.message || e) }, 400);
   }

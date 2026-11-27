@@ -48,9 +48,26 @@
   body.modo-manual .so-manual{display:block}
   @media(max-width:900px){.painel{grid-template-columns:minmax(0,1fr)}.modos{grid-template-columns:1fr}.item{flex-wrap:wrap}.item .acoes{width:100%;justify-content:flex-start}}
   .caixa{min-width:0}
+  #login{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#FFD400,#FF9F1C);display:flex;align-items:center;justify-content:center;padding:20px}
+  #login form{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 50px rgba(0,0,0,.2);text-align:center}
+  #login h2{margin:0 0 6px}
+  #login input{width:100%;padding:13px 14px;font-size:1rem;border:2px solid #eee;border-radius:12px;margin:14px 0 10px;box-sizing:border-box}
+  #login button{width:100%}
+  #login .erro{color:#B42318;font-weight:700;min-height:1.2em;font-size:.9rem}
+  body.logado #login{display:none}
 </style>
 </head>
 <body data-base="" data-pagina="admin">
+<div id="login">
+  <form id="form-login" autocomplete="on">
+    <h2>🔒 Painel Super Promos</h2>
+    <div class="dica">Digite a senha só uma vez. Depois este aparelho fica conectado.</div>
+    <input type="text" name="username" value="admin" autocomplete="username" style="display:none">
+    <input id="login-senha" type="password" placeholder="Senha do painel" autocomplete="current-password" required>
+    <div class="erro" id="login-erro"></div>
+    <button class="btn btn-p" id="login-entrar" type="submit">Entrar</button>
+  </form>
+</div>
 <header class="topo" id="topo"></header>
 <main class="container">
 
@@ -119,9 +136,10 @@
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
         <h2>Ofertas (<span id="qtd">0</span>)</h2>
         <div class="botoes" style="margin:0">
-          <input id="senha" type="password" placeholder="Senha do painel" autocomplete="current-password" style="width:170px;padding:9px 12px">
+          <input id="senha" type="hidden">
           <button class="btn btn-p" id="publicar">🚀 Publicar no site</button>
           <button class="btn btn-sec" id="restaurar">↺ Descartar mudanças</button>
+          <button class="btn btn-sec" id="sair" type="button" title="Desconectar este aparelho">Sair</button>
         </div>
       </div>
       <div class="dica" id="pendente" style="margin-top:6px"></div>
@@ -130,9 +148,9 @@
   </div>
 
   <div class="passos">
-    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → digite a senha ao lado de <b>🚀 Publicar no site</b> e clique nele. Pronto, já está no ar.<br><span class="dica">Com a senha digitada, as ofertas pendentes ficam salvas na nuvem e aparecem em qualquer aparelho.</span>
+    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → <b>🚀 Publicar no site</b>. Pronto, já está no ar.<br><span class="dica">As ofertas pendentes ficam salvas na nuvem e aparecem em qualquer aparelho conectado.</span>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <label class="check" style="margin:0"><input type="checkbox" id="lembrar" checked> lembrar a senha neste aparelho</label>
+      <input type="checkbox" id="lembrar" checked hidden>
       <button class="btn btn-sec mini" id="baixar" type="button" title="Cópia de segurança">⬇ Baixar cópia</button>
     </div>
   </div>
@@ -198,7 +216,7 @@
   function buscarRascunho(){
     var senha = senhaAtual(); if (!senha || location.protocol === "file:") return Promise.resolve();
     return fetch("api/rascunho", { headers: { "x-senha": senha }, cache: "no-store" }).then(function(r){
-      if (r.status === 401) { SP.toast("⚠️ Senha incorreta"); try { localStorage.removeItem(CS); } catch(e) {} return; }
+      if (r.status === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); return; }
       return r.json().then(function(j){
         var tLocal = mudou ? (Number(localStorage.getItem(CH + "_t")) || 0) : 0;
         if (j && Array.isArray(j.lista) && j.t > tLocal) {
@@ -324,7 +342,7 @@
   };
   $("publicar").onclick = function(){
     var senha = $("senha").value.trim();
-    if (!senha) { $("senha").focus(); SP.toast("Digite a senha do painel"); return; }
+    if (!senha) { sairPainel(""); return; }
     var bt = this; bt.disabled = true; bt.textContent = "Publicando…";
     fetch("api/ofertas", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senha }, body: JSON.stringify(lista) })
       .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
@@ -335,7 +353,7 @@
           fetch("api/rascunho", { method: "DELETE", headers: { "x-senha": senha } }).catch(function(){});
           SP.toast("✅ Publicado! " + res.j.total + " ofertas no ar");
         } else {
-          if (res.s === 401) { try { localStorage.removeItem(CS); } catch(e) {} $("senha").value = ""; }
+          if (res.s === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); return; }
           SP.toast("⚠️ " + (res.j.erro || "Erro ao publicar"));
         }
       }).catch(function(){ SP.toast("⚠️ Sem conexão. Tente de novo."); })
@@ -348,8 +366,27 @@
     mudou = false; lista = JSON.parse(JSON.stringify(doSite)); desenhar(); limpar();
     carregarDoSite(true);
   };
-  $("senha").addEventListener("change", buscarRascunho);
-  $("senha").addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); buscarRascunho(); } });
+  function sairPainel(msg){
+    try { localStorage.removeItem(CS); } catch(e) {}
+    $("senha").value = ""; document.body.classList.remove("logado");
+    $("login-erro").textContent = msg || ""; $("login-senha").value = ""; setTimeout(function(){ $("login-senha").focus(); }, 50);
+  }
+  $("form-login").addEventListener("submit", function(e){
+    e.preventDefault();
+    var s = $("login-senha").value.trim(); if (!s) return;
+    var bt = $("login-entrar"); bt.disabled = true; bt.textContent = "Entrando…"; $("login-erro").textContent = "";
+    fetch("api/rascunho", { headers: { "x-senha": s }, cache: "no-store" }).then(function(r){
+      if (r.status === 401) { $("login-erro").textContent = "Senha incorreta"; return; }
+      if (!r.ok && r.status !== 404) { $("login-erro").textContent = "Erro no servidor (" + r.status + "). Tente de novo."; return; }
+      try { localStorage.setItem(CS, s); } catch(e) {}
+      $("senha").value = s; document.body.classList.add("logado");
+      SP.toast("✅ Conectado! Não precisa mais digitar a senha neste aparelho");
+      buscarRascunho();
+    }).catch(function(){ $("login-erro").textContent = "Sem conexão. Tente de novo."; })
+      .then(function(){ bt.disabled = false; bt.textContent = "Entrar"; });
+  });
+  $("sair").onclick = function(){ if (confirm("Desconectar este aparelho do painel?")) sairPainel(""); };
+  if ($("senha").value) document.body.classList.add("logado"); else setTimeout(function(){ $("login-senha").focus(); }, 100);
   desenhar();
   carregarDoSite(false).then(buscarRascunho);
 })();

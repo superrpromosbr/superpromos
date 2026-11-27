@@ -5,6 +5,9 @@
 */
 const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+const PROIBIDO = /zoom|menor pre[çc]o|lojas comparadas|\d+\s*%\s*off|-\s*\d+\s*%/i;
+const limparDescricao = (t) => String(t || "").split(/(?<=[.!?])\s+/).filter((f) => !PROIBIDO.test(f)).join(" ").trim();
+
 async function lerLista(env, origem) {
   if (env.OFERTAS) {
     const v = await env.OFERTAS.get("produtos");
@@ -28,7 +31,7 @@ export async function onRequestGet({ params, env, request }) {
   if (!tpl.includes("<!--OG-->")) tpl = await (await env.ASSETS.fetch(new URL("/produto", url.origin))).text();
 
   const titulo = p ? p.titulo : "Oferta não encontrada";
-  const desc = p ? (p.descricao || "Oferta selecionada pela Super Promos BR").slice(0, 180) : "Veja as ofertas da Super Promos BR";
+  const desc = p ? (limparDescricao(p.descricao) || "Oferta selecionada pela Super Promos BR · confira o preço atualizado na Amazon").slice(0, 180) : "Veja as ofertas da Super Promos BR";
   const img = p && p.imagem ? p.imagem : url.origin + "/assets/img/og-padrao.png";
   const og = [
     `<link rel="canonical" href="${url.origin}/p/${id}/">`,

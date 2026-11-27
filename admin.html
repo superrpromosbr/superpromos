@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Postar ofertas | Super Promos BR</title>
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=mwyf2hq0">
 <style>
   .painel{display:grid;grid-template-columns:440px 1fr;gap:20px;margin:20px auto}
   .caixa{background:#fff;border-radius:18px;padding:20px;box-shadow:var(--sombra)}
@@ -119,7 +119,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
         <h2>Ofertas (<span id="qtd">0</span>)</h2>
         <div class="botoes" style="margin:0">
-          <button class="btn btn-p" id="baixar">⬇ Baixar products.js</button>
+          <button class="btn btn-p" id="publicar">🚀 Publicar no site</button>
           <button class="btn btn-sec" id="restaurar">↺ Descartar mudanças</button>
         </div>
       </div>
@@ -129,24 +129,35 @@
   </div>
 
   <div class="passos">
-    <strong>Para as mudanças aparecerem no site:</strong>
-    <ol>
-      <li>Clique em <b>“Baixar products.js”</b>.</li>
-      <li>Envie esse arquivo para o site, substituindo <code>assets/js/products.js</code> (veja o guia em PDF).</li>
-    </ol>
+    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → <b>🚀 Publicar no site</b>. Pronto, já está no ar.
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label for="senha" style="margin:0">Senha do painel:</label>
+      <input id="senha" type="password" autocomplete="current-password" style="max-width:220px">
+      <label class="check" style="margin:0"><input type="checkbox" id="lembrar" checked> lembrar neste aparelho</label>
+      <button class="btn btn-sec mini" id="baixar" type="button" title="Cópia de segurança">⬇ Baixar cópia</button>
+    </div>
   </div>
 </main>
 <footer class="rodape" id="rodape"></footer>
-<script src="assets/js/config.js"></script>
-<script src="assets/js/products.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/config.js?v=mwyf2hq0"></script>
+<script src="assets/js/products.js?v=mwyf2hq0"></script>
+<script src="assets/js/app.js?v=mwyf2hq0"></script>
 <script>
 (function(){
   var S = window.SITE, SP = window.SuperPromos, CH = "superpromos_rascunho", CM = "superpromos_modo";
   var $ = function(id){ return document.getElementById(id); };
   var lista, editando = null, dadosApi = null, mudou = false;
   try { lista = JSON.parse(localStorage.getItem(CH)); mudou = localStorage.getItem(CH + "_p") === "1"; } catch(e) {}
-  if (!lista) lista = JSON.parse(JSON.stringify(window.PRODUTOS || []));
+  var doSite = JSON.parse(JSON.stringify(window.PRODUTOS || []));
+  if (!lista) lista = doSite.slice();
+  var CS = "superpromos_senha";
+  try { if (localStorage.getItem(CS)) $("senha").value = localStorage.getItem(CS); } catch(e) {}
+  function carregarDoSite(sobrescrever){
+    if (location.protocol === "file:") return Promise.resolve();
+    return fetch("api/ofertas", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if (j && Array.isArray(j.produtos)) { doSite = j.produtos; if (sobrescrever || !mudou) { lista = JSON.parse(JSON.stringify(doSite)); desenhar(); } }
+    }).catch(function(){});
+  }
   $("tag").textContent = S.tagAmazon;
   $("validade").textContent = S.horasValidadePrecoManual || 24;
 
@@ -180,7 +191,7 @@
 
   function desenhar(){
     $("qtd").textContent = lista.length;
-    $("pendente").innerHTML = mudou ? '<span class="alerta">● Há mudanças que ainda não foram para o site — baixe o products.js.</span>' : "";
+    $("pendente").innerHTML = mudou ? '<span class="alerta">● Há mudanças que ainda não foram publicadas — clique em 🚀 Publicar no site.</span>' : "";
     var cats = {"Ofertas":1}; lista.forEach(function(p){ if (p.categoria) cats[p.categoria]=1; });
     ["Eletrônicos","Casa e Cozinha","Papelaria","Games","Beleza","Moda","Informática","Celulares","Brinquedos","Ferramentas","Pet Shop","Livros","Esporte e Lazer"].forEach(function(c){cats[c]=1;});
     $("cats").innerHTML = Object.keys(cats).map(function(c){return '<option value="'+esc(c)+'">';}).join("");
@@ -279,20 +290,37 @@
   });
 
   $("baixar").onclick = function(){
-    var cab = "/* Lista de ofertas — gerada pelo painel em " + new Date().toLocaleString("pt-BR") + " */\n";
-    var txt = cab + "window.PRODUTOS = " + JSON.stringify(lista, null, 2) + ";\n";
+    var txt = "/* Cópia das ofertas — " + new Date().toLocaleString("pt-BR") + " */\nwindow.PRODUTOS = " + JSON.stringify(lista, null, 2) + ";\n";
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([txt], { type: "text/javascript" }));
     a.download = "products.js"; document.body.appendChild(a); a.click(); a.remove();
-    mudou = false; try { localStorage.setItem(CH + "_p", "0"); } catch(e) {}
-    desenhar(); SP.toast("Arquivo baixado! Agora envie para o site.");
+  };
+  $("publicar").onclick = function(){
+    var senha = $("senha").value.trim();
+    if (!senha) { $("senha").focus(); SP.toast("Digite a senha do painel"); return; }
+    var bt = this; bt.disabled = true; bt.textContent = "Publicando…";
+    fetch("api/ofertas", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senha }, body: JSON.stringify(lista) })
+      .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
+      .then(function(res){
+        if (res.s === 200 && res.j.ok) {
+          try { if ($("lembrar").checked) localStorage.setItem(CS, senha); else localStorage.removeItem(CS); localStorage.setItem(CH + "_p", "0"); localStorage.setItem(CH, JSON.stringify(lista)); } catch(e) {}
+          mudou = false; doSite = JSON.parse(JSON.stringify(lista)); desenhar();
+          SP.toast("✅ Publicado! " + res.j.total + " ofertas no ar");
+        } else {
+          if (res.s === 401) { try { localStorage.removeItem(CS); } catch(e) {} $("senha").value = ""; }
+          SP.toast("⚠️ " + (res.j.erro || "Erro ao publicar"));
+        }
+      }).catch(function(){ SP.toast("⚠️ Sem conexão. Tente de novo."); })
+      .then(function(){ bt.disabled = false; bt.textContent = "🚀 Publicar no site"; });
   };
   $("restaurar").onclick = function(){
-    if (!confirm("Descartar as mudanças deste aparelho e voltar à lista que está no site?")) return;
+    if (!confirm("Descartar as mudanças deste aparelho e voltar ao que está publicado no site?")) return;
     try { localStorage.removeItem(CH); localStorage.removeItem(CH + "_p"); } catch(e){}
-    lista = JSON.parse(JSON.stringify(window.PRODUTOS || [])); mudou = false; desenhar(); limpar();
+    mudou = false; lista = JSON.parse(JSON.stringify(doSite)); desenhar(); limpar();
+    carregarDoSite(true);
   };
   desenhar();
+  carregarDoSite(false);
 })();
 </script>
 </body>

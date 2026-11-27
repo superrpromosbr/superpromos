@@ -39,37 +39,9 @@ for (const f of ["index.html", "produto.html", "404.html", "admin.html", "sobre.
 }
 const modelo = fs.readFileSync(path.join(raiz, "produto.html"), "utf8");
 
-// limpa páginas antigas (produtos removidos)
-const pastaP = path.join(raiz, "p");
-fs.rmSync(pastaP, { recursive: true, force: true });
-fs.mkdirSync(pastaP, { recursive: true });
-
-const ids = new Set();
-for (const p of P) {
-  if (!/^[a-z0-9-]+$/.test(p.id)) { console.warn("⚠️  ID inválido (use só a-z, 0-9 e -):", p.id); continue; }
-  if (ids.has(p.id)) { console.warn("⚠️  ID repetido:", p.id); continue; }
-  ids.add(p.id);
-  const desc = (p.descricao || S.slogan).slice(0, 180);
-  const img = p.imagem || url + "/assets/img/og-padrao.png";
-  const og = [
-    `<link rel="canonical" href="${url}/p/${p.id}/">`,
-    `<meta name="description" content="${esc(desc)}">`,
-    `<meta property="og:type" content="product">`,
-    `<meta property="og:site_name" content="${esc(S.nome)}">`,
-    `<meta property="og:title" content="${esc(p.titulo)}">`,
-    `<meta property="og:description" content="${esc(desc)}">`,
-    `<meta property="og:url" content="${url}/p/${p.id}/">`,
-    `<meta property="og:image" content="${esc(img)}">`,
-    `<meta name="twitter:card" content="summary_large_image">`
-  ].join("\n");
-  let html = modelo
-    .replace("<!--OG-->", og)
-    .replace(/<title>.*?<\/title>/, `<title>${esc(p.titulo)} | ${esc(S.nome)}</title>`)
-    .replace('data-base=""', `data-base="../../" data-id="${p.id}"`)
-    .replace(/(href|src)="assets\//g, '$1="../../assets/');
-  fs.mkdirSync(path.join(pastaP, p.id), { recursive: true });
-  fs.writeFileSync(path.join(pastaP, p.id, "index.html"), html);
-}
+// As páginas /p/ID agora são montadas na hora pela função functions/p/[[path]].js
+fs.rmSync(path.join(raiz, "p"), { recursive: true, force: true });
+const ids = new Set(P.map((p) => p.id));
 
 // sitemap
 const hoje = new Date().toISOString().slice(0, 10);
@@ -79,4 +51,4 @@ fs.writeFileSync(path.join(raiz, "sitemap.xml"),
   urls.map((u) => `  <url><loc>${u}</loc><lastmod>${hoje}</lastmod></url>`).join("\n") + `\n</urlset>\n`);
 fs.writeFileSync(path.join(raiz, "robots.txt"), `User-agent: *\nAllow: /\nDisallow: /admin.html\nSitemap: ${url}/sitemap.xml\n`);
 
-console.log(`✅ ${ids.size} páginas de produto geradas em /p/ + sitemap.xml`);
+console.log(`✅ versão ${versao} aplicada + sitemap.xml (${ids.size} ofertas no arquivo reserva)`);

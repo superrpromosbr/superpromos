@@ -31,7 +31,7 @@ export async function onRequestGet({ params, env, request }) {
   if (!tpl.includes("<!--OG-->")) tpl = await (await env.ASSETS.fetch(new URL("/produto", url.origin))).text();
 
   const titulo = p ? p.titulo : "Oferta não encontrada";
-  const desc = p ? (limparDescricao(p.descricao) || "Oferta selecionada pela Super Promos BR · confira o preço atualizado na Amazon").slice(0, 180) : "Veja as ofertas da Super Promos BR";
+  const desc = p ? (limparDescricao(p.descricao) || "Oferta selecionada pela Super Promos BR · confira o preço atualizado na loja").slice(0, 180) : "Veja as ofertas da Super Promos BR";
   const img = p && p.imagem ? p.imagem : url.origin + "/assets/img/og-padrao.png";
   const og = [
     `<link rel="canonical" href="${url.origin}/p/${id}/">`,

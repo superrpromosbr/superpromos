@@ -119,6 +119,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
         <h2>Ofertas (<span id="qtd">0</span>)</h2>
         <div class="botoes" style="margin:0">
+          <input id="senha" type="password" placeholder="Senha do painel" autocomplete="current-password" style="width:170px;padding:9px 12px">
           <button class="btn btn-p" id="publicar">🚀 Publicar no site</button>
           <button class="btn btn-sec" id="restaurar">↺ Descartar mudanças</button>
         </div>
@@ -129,11 +130,9 @@
   </div>
 
   <div class="passos">
-    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → <b>🚀 Publicar no site</b>. Pronto, já está no ar.
+    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → digite a senha ao lado de <b>🚀 Publicar no site</b> e clique nele. Pronto, já está no ar.<br><span class="dica">Com a senha digitada, as ofertas pendentes ficam salvas na nuvem e aparecem em qualquer aparelho.</span>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <label for="senha" style="margin:0">Senha do painel:</label>
-      <input id="senha" type="password" autocomplete="current-password" style="max-width:220px">
-      <label class="check" style="margin:0"><input type="checkbox" id="lembrar" checked> lembrar neste aparelho</label>
+      <label class="check" style="margin:0"><input type="checkbox" id="lembrar" checked> lembrar a senha neste aparelho</label>
       <button class="btn btn-sec mini" id="baixar" type="button" title="Cópia de segurança">⬇ Baixar cópia</button>
     </div>
   </div>
@@ -182,7 +181,35 @@
   }).catch(function(){ st.textContent = "API indisponível neste servidor"; st.className = "status nok"; });
 
   /* ----- utilidades ----- */
-  function guardar(){ mudou = true; try { localStorage.setItem(CH, JSON.stringify(lista)); localStorage.setItem(CH + "_p", "1"); } catch(e){} desenhar(); }
+  function guardar(){ mudou = true; try { localStorage.setItem(CH, JSON.stringify(lista)); localStorage.setItem(CH + "_p", "1"); localStorage.setItem(CH + "_t", String(Date.now())); } catch(e){} desenhar(); enviarRascunho(); }
+  /* ----- rascunho na nuvem (exige senha) ----- */
+  var timerR = null;
+  function senhaAtual(){ return $("senha").value.trim(); }
+  function enviarRascunho(){
+    clearTimeout(timerR);
+    timerR = setTimeout(function(){
+      var senha = senhaAtual(); if (!senha || !mudou || location.protocol === "file:") return;
+      var t = Number(localStorage.getItem(CH + "_t")) || Date.now();
+      fetch("api/rascunho", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senha }, body: JSON.stringify({ lista: lista, t: t }) })
+        .then(function(r){ if (r.ok) $("pendente").innerHTML = '<span class="alerta">● Há mudanças que ainda não foram publicadas</span> <span class="dica">(salvas na nuvem ✓)</span>'; })
+        .catch(function(){});
+    }, 600);
+  }
+  function buscarRascunho(){
+    var senha = senhaAtual(); if (!senha || location.protocol === "file:") return Promise.resolve();
+    return fetch("api/rascunho", { headers: { "x-senha": senha }, cache: "no-store" }).then(function(r){
+      if (r.status === 401) { SP.toast("⚠️ Senha incorreta"); try { localStorage.removeItem(CS); } catch(e) {} return; }
+      return r.json().then(function(j){
+        var tLocal = mudou ? (Number(localStorage.getItem(CH + "_t")) || 0) : 0;
+        if (j && Array.isArray(j.lista) && j.t > tLocal) {
+          lista = j.lista; mudou = true;
+          try { localStorage.setItem(CH, JSON.stringify(lista)); localStorage.setItem(CH + "_p", "1"); localStorage.setItem(CH + "_t", String(j.t)); } catch(e) {}
+          desenhar(); SP.toast("☁️ Ofertas pendentes carregadas da nuvem");
+        } else if (mudou) { enviarRascunho(); }
+        if ($("lembrar").checked) try { localStorage.setItem(CS, senha); } catch(e) {}
+      });
+    }).catch(function(){});
+  }
   function slug(t){ return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50).replace(/-$/,""); }
   function esc(s){ return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function asinDe(link){ var m = link.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/i); return m ? m[1].toUpperCase() : ""; }
@@ -305,6 +332,7 @@
         if (res.s === 200 && res.j.ok) {
           try { if ($("lembrar").checked) localStorage.setItem(CS, senha); else localStorage.removeItem(CS); localStorage.setItem(CH + "_p", "0"); localStorage.setItem(CH, JSON.stringify(lista)); } catch(e) {}
           mudou = false; doSite = JSON.parse(JSON.stringify(lista)); desenhar();
+          fetch("api/rascunho", { method: "DELETE", headers: { "x-senha": senha } }).catch(function(){});
           SP.toast("✅ Publicado! " + res.j.total + " ofertas no ar");
         } else {
           if (res.s === 401) { try { localStorage.removeItem(CS); } catch(e) {} $("senha").value = ""; }
@@ -315,12 +343,15 @@
   };
   $("restaurar").onclick = function(){
     if (!confirm("Descartar as mudanças deste aparelho e voltar ao que está publicado no site?")) return;
-    try { localStorage.removeItem(CH); localStorage.removeItem(CH + "_p"); } catch(e){}
+    try { localStorage.removeItem(CH); localStorage.removeItem(CH + "_p"); localStorage.removeItem(CH + "_t"); } catch(e){}
+    if (senhaAtual()) fetch("api/rascunho", { method: "DELETE", headers: { "x-senha": senhaAtual() } }).catch(function(){});
     mudou = false; lista = JSON.parse(JSON.stringify(doSite)); desenhar(); limpar();
     carregarDoSite(true);
   };
+  $("senha").addEventListener("change", buscarRascunho);
+  $("senha").addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); buscarRascunho(); } });
   desenhar();
-  carregarDoSite(false);
+  carregarDoSite(false).then(buscarRascunho);
 })();
 </script>
 </body>

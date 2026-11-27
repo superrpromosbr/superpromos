@@ -9,18 +9,22 @@
     - Variables and Secrets: ADMIN_SENHA (tipo Secret) = senha do painel
 */
 // Sem preço digitado, sem selo de desconto (regras do Programa de Associados)
-const CAMPOS = ["id", "titulo", "categoria", "asin", "url", "imagem", "descricao", "destaque", "cupom",
+const CAMPOS = ["id", "titulo", "categoria", "loja", "asin", "url", "imagem", "descricao", "destaque", "cupom",
   "data", "api", "tituloFixo"];
 const PROIBIDO = /zoom|menor pre[çc]o|lojas comparadas|\d+\s*%\s*off|-\s*\d+\s*%/i;
 function limparDescricao(t) {
   if (!t) return "";
   return String(t).split(/(?<=[.!?])\s+/).filter((f) => !PROIBIDO.test(f)).join(" ").trim();
 }
+// Mercado Livre: só links do próprio domínio (mercadolivre.com/sec/... ou mercadolivre.com.br/...), sem encurtadores
+const ML = /^https:\/\/([a-z0-9-]+\.)*mercadolivre\.com(\.br)?\//i;
 function sanear(lista) {
   return (lista || []).map((p) => {
     const o = {};
     for (const c of CAMPOS) if (p[c] !== undefined && p[c] !== null && p[c] !== "") o[c] = p[c];
     if (o.descricao) { o.descricao = limparDescricao(o.descricao); if (!o.descricao) delete o.descricao; }
+    o.loja = ML.test(o.url || "") ? "mercadolivre" : "amazon";
+    if (o.loja === "mercadolivre") { delete o.asin; delete o.api; }
     return o;
   });
 }
@@ -52,7 +56,11 @@ function limpar(lista) {
     ids.add(o.id);
     if (!o.titulo) throw new Error("Oferta sem título: " + o.id);
     if (!o.asin && !o.url) throw new Error("Oferta sem link: " + o.id);
-    if (o.url && !/^https:\/\/([a-z0-9-]+\.)*(amazon\.com\.br|amzn\.to|link\.amazon)\//i.test(o.url)) throw new Error("Link fora da Amazon: " + o.id);
+    if (o.url && !/^https:\/\/([a-z0-9-]+\.)*(amazon\.com\.br|amzn\.to|link\.amazon)\//i.test(o.url) && !ML.test(o.url)) throw new Error("Link que não é da Amazon nem do Mercado Livre: " + o.id);
+    if (ML.test(o.url || "")) {
+      const u = new URL(o.url);
+      if (/^(lista|listado)\./i.test(u.hostname) || u.pathname === "/") throw new Error("Link do Mercado Livre precisa ser de um produto (não de busca/página inicial): " + o.id);
+    }
     if (o.imagem && !/^https:\/\//i.test(o.imagem)) delete o.imagem;
     return o;
   });

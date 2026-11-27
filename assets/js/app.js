@@ -258,9 +258,22 @@
     if (PAGINA === "produto") paginaProduto();
   }
 
+  /* Lista publicada pelo botão "Publicar" do painel (se existir). Senão usa products.js */
+  function carregarLista() {
+    if (location.protocol === "file:" || PAGINA === "admin") return Promise.resolve();
+    var pedido = fetch(BASE + "api/ofertas", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (j && Array.isArray(j.produtos)) P = j.produtos.map(function (p) { return Object.assign({}, p); });
+      }).catch(function () {});
+    return Promise.race([pedido, new Promise(function (r) { setTimeout(r, 3000); })]);
+  }
+
   montarTopo(); montarRodape();
-  renderizar();                         // mostra na hora com os dados salvos
-  carregarApi().then(function () {      // e atualiza com preços da API, se houver
+  carregarLista().then(function () {
+    renderizar();
+    return carregarApi();               // atualiza com preços da API, se houver
+  }).then(function () {
     if (P.some(function (p) { return p.api; })) renderizar();
   });
 

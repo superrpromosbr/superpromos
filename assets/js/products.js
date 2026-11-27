@@ -8,10 +8,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61evEYmxBZL._AC_SL500_.jpg",
     "descricao": "Controle luzes, músicas e lembretes só com a voz. Um dos mais vendidos da Amazon e com desconto de Black Friday.",
     "destaque": true,
-    "selo": "-55%",
-    "preco": "R$ 289,00",
-    "precoAntigo": "R$ 649,00",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -22,10 +18,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61EwP1HwXlL._AC_SL500_.jpg",
     "descricao": "Transforma qualquer TV com HDMI em Smart TV: Netflix, Prime Video, YouTube e mais.",
     "destaque": true,
-    "selo": "-54%",
-    "preco": "R$ 220,50",
-    "precoAntigo": "R$ 479,00",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -36,10 +28,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/51OCtiSoKWL._AC_SL500_.jpg",
     "descricao": "Tablet ótimo para estudar, ver séries e anotar. Tela grande e 128GB de espaço.",
     "destaque": true,
-    "selo": "-36%",
-    "preco": "R$ 1.985,46",
-    "precoAntigo": "R$ 3.149,00",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -50,10 +38,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61GNEp3auhL._AC_SL500_.jpg",
     "descricao": "Controle oficial do PlayStation 5 com resposta tátil e gatilhos adaptáveis.",
     "destaque": true,
-    "selo": "-20%",
-    "preco": "R$ 399,00",
-    "precoAntigo": "R$ 499,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -64,10 +48,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/41y-G-g+dVL._AC_SL500_.jpg",
     "descricao": "Carrega dois controles ao mesmo tempo, sem ocupar as portas USB do console.",
     "destaque": false,
-    "selo": "-33%",
-    "preco": "R$ 165,90",
-    "precoAntigo": "R$ 249,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -78,10 +58,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/510Uj5C7LdL._AC_SL500_.jpg",
     "descricao": "Fritadeira sem óleo de cesto grande, ideal para a família toda. Quase metade do preço.",
     "destaque": true,
-    "selo": "-46%",
-    "preco": "R$ 296,65",
-    "precoAntigo": "R$ 549,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -92,10 +68,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/41D8P06OeqL._AC_SL500_.jpg",
     "descricao": "O famoso copo térmico com alça e canudo: mantém a bebida gelada por horas.",
     "destaque": true,
-    "selo": "-55%",
-    "preco": "R$ 160,20",
-    "precoAntigo": "R$ 359,00",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -106,10 +78,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/51UxR8FHe-L._AC_SL500_.jpg",
     "descricao": "Prática para o café da manhã e lanches rápidos. Atenção: modelo 127V.",
     "destaque": false,
-    "selo": "-53%",
-    "preco": "R$ 75,00",
-    "precoAntigo": "R$ 159,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -120,10 +88,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61-TzEg09KL._AC_SL500_.jpg",
     "descricao": "Libera espaço na mesa e deixa o monitor na altura certa para a postura.",
     "destaque": false,
-    "selo": "-55%",
-    "preco": "R$ 99,99",
-    "precoAntigo": "R$ 219,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -134,10 +98,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61wJxH8y1DL._AC_SL500_.jpg",
     "descricao": "O papel A4 mais vendido do Brasil, para impressora, escola e escritório.",
     "destaque": false,
-    "selo": "-8%",
-    "preco": "R$ 32,90",
-    "precoAntigo": "R$ 35,88",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -148,10 +108,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/51nXMn5alFL._AC_SL500_.jpg",
     "descricao": "Escrita macia e que seca rápido, não borra. Queridinha para anotações.",
     "destaque": false,
-    "selo": "-40%",
-    "preco": "R$ 8,64",
-    "precoAntigo": "R$ 14,48",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -162,10 +118,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/71-2eDnKH7L._AC_SL500_.jpg",
     "descricao": "Kit completo para escola e desenho, da marca mais confiável do Brasil.",
     "destaque": false,
-    "selo": "-31%",
-    "preco": "R$ 28,50",
-    "precoAntigo": "R$ 41,74",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -176,10 +128,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/81ROHWxRCzL._AC_SL500_.jpg",
     "descricao": "Ponta fina e grossa em cada caneta: ótimo para desenho, lettering e planners.",
     "destaque": false,
-    "selo": "-26%",
-    "preco": "R$ 21,99",
-    "precoAntigo": "R$ 29,99",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   },
   {
@@ -190,10 +138,6 @@ window.PRODUTOS = [
     "imagem": "https://m.media-amazon.com/images/I/61tkhebgcnL._AC_SL500_.jpg",
     "descricao": "Finalizador para cabelos com brilho e menos frizz. Mais da metade de desconto.",
     "destaque": false,
-    "selo": "-59%",
-    "preco": "R$ 19,99",
-    "precoAntigo": "R$ 49,90",
-    "atualizadoEm": "2026-11-26T18:02:00.000Z",
     "data": "2026-11-26"
   }
 ];

@@ -33,8 +33,13 @@
     return z(d.getDate()) + "/" + z(d.getMonth() + 1) + "/" + d.getFullYear() + " às " + z(d.getHours()) + ":" + z(d.getMinutes());
   }
   /* Só mostra preço se tiver data/hora e estiver dentro da validade */
+  /* Preço digitado à mão NUNCA aparece (regra da Amazon). Só preço vindo da API oficial. */
+  var PROIBIDO = /zoom|menor pre[çc]o|lojas comparadas|\d+\s*%\s*off|-\s*\d+\s*%/i;
+  function limparDescricao(t) {
+    return String(t || "").split(/(?<=[.!?])\s+/).filter(function (f) { return !PROIBIDO.test(f); }).join(" ").trim();
+  }
   function precoValido(p) {
-    if (!p.preco) return false;
+    if (!p.preco || !p.api) return false;
     var d = lerData(p.atualizadoEm);
     if (!d) return false;
     if (p.api) return true; // veio da API agora
@@ -76,8 +81,7 @@
               if (it.imagem) p.imagem = it.imagem;
               if (it.link) p.linkApi = it.link;
               if (it.preco) { p.preco = it.preco; p.atualizadoEm = j.atualizadoEm; }
-              if (it.precoAntigo && it.precoAntigo !== it.preco) p.precoAntigo = it.precoAntigo;
-              if (it.desconto && !p.selo) p.selo = "-" + it.desconto + "%";
+
             });
           });
         }).catch(function () {});
@@ -96,8 +100,7 @@
   function blocoPreco(p, grande) {
     if (precoValido(p)) {
       var d = lerData(p.atualizadoEm);
-      return (p.precoAntigo ? '<div class="preco-antigo">' + esc(p.precoAntigo) + "</div>" : "") +
-        '<div class="preco">' + esc(p.preco) + "</div>" +
+      return '<div class="preco">' + esc(p.preco) + "</div>" +
         (grande ? "" : '<div class="hora-preco" title="' + esc(AVISO_PRECO) + '">em ' + fmtData(d) + " ⓘ</div>");
     }
     return '<span class="ver-preco">' + (grande ? "Confira o preço atualizado na Amazon" : "Ver preço na Amazon") + "</span>";
@@ -105,7 +108,7 @@
 
   function card(p) {
     return '<a class="card" href="' + linkInterno(p) + '">' +
-      '<div class="foto">' + (p.selo ? '<span class="selo">' + esc(p.selo) + "</span>" : "") + foto(p) + "</div>" +
+      '<div class="foto">' + foto(p) + "</div>" +
       '<div class="info"><span class="cat">' + esc(p.categoria || "Ofertas") + "</span>" +
       "<h3>" + esc(p.titulo) + "</h3>" +
       '<div class="rodape-card"><div>' + blocoPreco(p) + '</div><span class="seta">›</span></div>' +
@@ -219,14 +222,14 @@
       '<a href="' + BASE + 'index.html">Início</a> › <a href="' + BASE + "index.html?cat=" + encodeURIComponent(cat) + '#todas">' + esc(cat) + "</a> › Amazon";
 
     alvo.innerHTML =
-      '<div class="galeria">' + (p.selo ? '<span class="selo">' + esc(p.selo) + "</span>" : "") + foto(p) + "</div>" +
+      '<div class="galeria">' + foto(p) + "</div>" +
       "<div>" +
       '<span class="tag-parceria">#publi · link de associado</span>' +
       "<h1>" + esc(p.titulo) + "</h1>" +
       '<span class="loja">Compra feita no site da <b>Amazon.com.br</b></span>' +
       '<div class="caixa-preco">' + blocoPreco(p, true) + '<div class="aviso-preco">' + avisoPreco + "</div></div>" +
       (p.cupom ? '<div class="cupom"><span>Cupom:</span><code>' + esc(p.cupom) + '</code><button class="btn btn-sec" data-copiar="' + esc(p.cupom) + '">Copiar</button></div>' : "") +
-      (p.descricao ? '<p class="descricao">' + esc(p.descricao) + "</p>" : "") +
+      (limparDescricao(p.descricao) ? '<p class="descricao">' + esc(limparDescricao(p.descricao)) + "</p>" : "") +
       '<a class="btn btn-amazon" href="' + esc(linkAmazon(p)) + '" target="_blank" rel="sponsored noopener">Comprar na Amazon →</a>' +
       '<p class="seguro">🔒 Você finaliza a compra com segurança no site oficial da Amazon.</p>' +
       '<div class="compartilhar">' +

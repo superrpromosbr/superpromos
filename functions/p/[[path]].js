@@ -11,7 +11,7 @@ const limparDescricao = (t) => String(t || "").split(/(?<=[.!?])\s+/).filter((f)
 async function lerLista(env, origem) {
   if (env.OFERTAS) {
     const v = await env.OFERTAS.get("produtos");
-    if (v) return JSON.parse(v);
+    if (v) return JSON.parse(v).filter((p) => !p.oculto); // pendentes não aparecem
   }
   // reserva: lista do arquivo assets/js/products.js
   const r = await env.ASSETS.fetch(new URL("/assets/js/products.js", origem));

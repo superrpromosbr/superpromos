@@ -14,7 +14,7 @@
   };
   function lojaDe(p) {
     if (p.loja && LOJAS[p.loja]) return p.loja;
-    try { if (/(^|\.)mercadoli(vre|bre)\.com(\.br)?$/i.test(new URL(p.url).hostname)) return "mercadolivre"; } catch (e) {}
+    try { if (/(^|\.)mercadoli(vre|bre)\.com(\.br)?$|^meli\.la$/i.test(new URL(p.url).hostname)) return "mercadolivre"; } catch (e) {}
     return "amazon";
   }
   function L(p) { return LOJAS[lojaDe(p)]; }
@@ -77,7 +77,8 @@
     } catch (e) { return "https://www.amazon.com.br/?tag=" + tag; }
   }
   function linkInterno(p) { return BASE + "produto.html?id=" + encodeURIComponent(p.id); }
-  function enderecoSite() { return /^https?:$/.test(location.protocol) && !/localhost|127\.0\.0\.1/.test(location.hostname) ? location.origin : (S.url || ""); }
+  // Sempre o endereço oficial (superrpromosbr.com.br), mesmo se a página foi aberta pelo endereço .pages.dev
+  function enderecoSite() { return S.url || location.origin; }
   function linkPublico(p) { return enderecoSite() + "/p/" + p.id; }
 
   /* ---------- Modo API: busca dados atualizados ---------- */

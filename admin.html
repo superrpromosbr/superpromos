@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Postar ofertas | Super Promos BR</title>
-<link rel="stylesheet" href="assets/css/style.css?v=mwyy57nf">
+<link rel="stylesheet" href="assets/css/style.css?v=mwzq3j5c">
 <style>
   .painel{display:grid;grid-template-columns:440px 1fr;gap:20px;margin:20px auto}
   .caixa{background:#fff;border-radius:18px;padding:20px;box-shadow:var(--sombra)}
@@ -38,6 +38,8 @@
   .item .txt{flex:1;min-width:0}
   .item .txt b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .item small{color:var(--texto-suave)}
+  .st{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:4px}
+  .st-pend{background:#FFF4D6;color:#8A5A00}.st-pub{background:#E3F6EC;color:#0B7A43}
   .item .acoes{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   .mini{padding:6px 11px;font-size:.78rem}
   .alerta{color:#B42318;font-weight:700}
@@ -84,9 +86,9 @@
       <h2 id="form-titulo">Postar oferta</h2>
 
       <label>Link de afiliado (Amazon ou Mercado Livre) *</label>
-      <input id="f-link" inputmode="url" placeholder="Amazon: link.amazon/... · Mercado Livre: mercadolivre.com/sec/..." required>
+      <input id="f-link" inputmode="url" placeholder="Amazon: link.amazon/... · Mercado Livre: meli.la/..." required>
       <div class="dica" id="loja-detectada"></div>
-      <div class="dica">Pode ser o link curto do SiteStripe. Sua tag <b id="tag"></b> é garantida.</div>
+      <div class="dica">Amazon: link curto do SiteStripe (sua tag <b id="tag"></b> é garantida). Mercado Livre: link gerado na Central de Afiliados (meli.la/...).</div>
 
       <!-- MODO API -->
       <div class="so-api">
@@ -128,7 +130,8 @@
       </details>
 
       <div class="botoes">
-        <button class="btn btn-p" type="submit" id="salvar">✅ Salvar oferta</button>
+        <button class="btn btn-p" type="submit" id="salvar" data-pendente="0">🚀 Salvar e publicar</button>
+        <button class="btn btn-sec" type="submit" id="salvar-pend" data-pendente="1">💾 Salvar como pendente</button>
         <button class="btn btn-sec" type="button" id="cancelar" style="display:none">Cancelar</button>
       </div>
     </form>
@@ -138,8 +141,8 @@
         <h2>Ofertas (<span id="qtd">0</span>)</h2>
         <div class="botoes" style="margin:0">
           <input id="senha" type="hidden">
-          <button class="btn btn-p" id="publicar">🚀 Publicar no site</button>
-          <button class="btn btn-sec" id="restaurar">↺ Descartar mudanças</button>
+          <button class="btn btn-p" id="publicar" style="display:none">🚀 Publicar pendentes</button>
+          <button class="btn btn-sec" id="atualizar" type="button" title="Buscar as mudanças feitas em outros aparelhos">↻ Atualizar</button>
           <button class="btn btn-sec" id="sair" type="button" title="Desconectar este aparelho">Sair</button>
         </div>
       </div>
@@ -149,7 +152,7 @@
   </div>
 
   <div class="passos">
-    <strong>Como postar:</strong> preencha a oferta → <b>✅ Salvar oferta</b> → <b>🚀 Publicar no site</b>. Pronto, já está no ar.<br><span class="dica">As ofertas pendentes ficam salvas na nuvem e aparecem em qualquer aparelho conectado.</span>
+    <strong>Como postar:</strong> cole o link, preencha título e imagem → <b>🚀 Salvar e publicar</b>. Pronto, já está no ar.<br><span class="dica">Quer deixar para depois? Use <b>💾 Salvar como pendente</b>: fica guardado no servidor (aparece em qualquer aparelho) e só vai para o site quando você clicar em Publicar.</span>
     <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <input type="checkbox" id="lembrar" checked hidden>
       <button class="btn btn-sec mini" id="baixar" type="button" title="Cópia de segurança">⬇ Baixar cópia</button>
@@ -157,24 +160,39 @@
   </div>
 </main>
 <footer class="rodape" id="rodape"></footer>
-<script src="assets/js/config.js?v=mwyy57nf"></script>
-<script src="assets/js/products.js?v=mwyy57nf"></script>
-<script src="assets/js/app.js?v=mwyy57nf"></script>
+<script src="assets/js/config.js?v=mwzq3j5c"></script>
+<script src="assets/js/products.js?v=mwzq3j5c"></script>
+<script src="assets/js/app.js?v=mwzq3j5c"></script>
 <script>
 (function(){
-  var S = window.SITE, SP = window.SuperPromos, CH = "superpromos_rascunho", CM = "superpromos_modo";
+  var S = window.SITE, SP = window.SuperPromos, CM = "superpromos_modo", CS = "superpromos_senha";
   var $ = function(id){ return document.getElementById(id); };
-  var lista, editando = null, dadosApi = null, mudou = false;
-  try { lista = JSON.parse(localStorage.getItem(CH)); mudou = localStorage.getItem(CH + "_p") === "1"; } catch(e) {}
-  var doSite = JSON.parse(JSON.stringify(window.PRODUTOS || []));
-  if (!lista) lista = doSite.slice();
-  var CS = "superpromos_senha";
+  var lista = [], editando = null, dadosApi = null, ocupado = false;
+  // Rascunhos antigos guardados no aparelho (versão anterior do painel) não são mais usados: tudo fica no servidor.
+  try { ["superpromos_rascunho","superpromos_rascunho_p","superpromos_rascunho_t"].forEach(function(k){ localStorage.removeItem(k); }); } catch(e) {}
   try { if (localStorage.getItem(CS)) $("senha").value = localStorage.getItem(CS); } catch(e) {}
-  function carregarDoSite(sobrescrever){
-    if (location.protocol === "file:") return Promise.resolve();
-    return fetch("api/ofertas", { cache: "no-store" }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
-      if (j && Array.isArray(j.produtos)) { doSite = j.produtos; if (sobrescrever || !mudou) { lista = JSON.parse(JSON.stringify(doSite)); desenhar(); } }
-    }).catch(function(){});
+  function senhaAtual(){ return $("senha").value.trim(); }
+  function linkPublico(p){ return (S.url || location.origin) + "/p/" + p.id; }
+
+  /* ----- servidor ----- */
+  function carregar(silencioso){
+    if (!senhaAtual()) return Promise.resolve();
+    return fetch("api/ofertas?todos=1", { headers: { "x-senha": senhaAtual() }, cache: "no-store" })
+      .then(function(r){ if (r.status === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); return null; } return r.json(); })
+      .then(function(j){ if (j && Array.isArray(j.produtos)) { lista = j.produtos; desenhar(); if (!silencioso) {} } })
+      .catch(function(){ if (!silencioso) SP.toast("⚠️ Sem conexão para buscar as ofertas."); });
+  }
+  function enviar(corpo, msgOk){
+    if (!senhaAtual()) { sairPainel(""); return Promise.reject(); }
+    ocupado = true;
+    return fetch("api/ofertas", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senhaAtual() }, body: JSON.stringify(corpo) })
+      .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
+      .then(function(res){
+        ocupado = false;
+        if (res.s === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); throw 0; }
+        if (res.s !== 200 || !res.j.ok) { SP.toast("⚠️ " + (res.j.erro || "Erro ao salvar")); throw 0; }
+        lista = res.j.produtos; desenhar(); if (msgOk) SP.toast(msgOk); return res.j;
+      }, function(e){ ocupado = false; SP.toast("⚠️ Sem conexão. Nada foi perdido: tente de novo."); throw e; });
   }
   $("tag").textContent = S.tagAmazon;
   $("validade").textContent = S.horasValidadePrecoManual || 24;
@@ -196,219 +214,175 @@
   else fetch("api/produtos?status=1").then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     if (j && j.configurado) { st.textContent = "API conectada ✓"; st.className = "status ok"; }
     else if (j) { st.textContent = "API sem chaves configuradas"; st.className = "status nok"; }
-    else { st.textContent = "API indisponível neste servidor"; st.className = "status nok"; }
-  }).catch(function(){ st.textContent = "API indisponível neste servidor"; st.className = "status nok"; });
+    else { st.textContent = "API indisponível"; st.className = "status nok"; }
+  }).catch(function(){ st.textContent = "API indisponível"; st.className = "status nok"; });
 
-  /* ----- utilidades ----- */
-  function guardar(){ mudou = true; try { localStorage.setItem(CH, JSON.stringify(lista)); localStorage.setItem(CH + "_p", "1"); localStorage.setItem(CH + "_t", String(Date.now())); } catch(e){} desenhar(); enviarRascunho(); }
-  /* ----- rascunho na nuvem (exige senha) ----- */
-  var timerR = null;
-  function senhaAtual(){ return $("senha").value.trim(); }
-  function enviarRascunho(){
-    clearTimeout(timerR);
-    timerR = setTimeout(function(){
-      var senha = senhaAtual(); if (!senha || !mudou || location.protocol === "file:") return;
-      var t = Number(localStorage.getItem(CH + "_t")) || Date.now();
-      fetch("api/rascunho", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senha }, body: JSON.stringify({ lista: lista, t: t }) })
-        .then(function(r){ if (r.ok) $("pendente").innerHTML = '<span class="alerta">● Há mudanças que ainda não foram publicadas</span> <span class="dica">(salvas na nuvem ✓)</span>'; })
-        .catch(function(){});
-    }, 600);
-  }
-  function buscarRascunho(){
-    var senha = senhaAtual(); if (!senha || location.protocol === "file:") return Promise.resolve();
-    return fetch("api/rascunho", { headers: { "x-senha": senha }, cache: "no-store" }).then(function(r){
-      if (r.status === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); return; }
-      return r.json().then(function(j){
-        var tLocal = mudou ? (Number(localStorage.getItem(CH + "_t")) || 0) : 0;
-        if (j && Array.isArray(j.lista) && j.t > tLocal) {
-          lista = j.lista; mudou = true;
-          try { localStorage.setItem(CH, JSON.stringify(lista)); localStorage.setItem(CH + "_p", "1"); localStorage.setItem(CH + "_t", String(j.t)); } catch(e) {}
-          desenhar(); SP.toast("☁️ Ofertas pendentes carregadas da nuvem");
-        } else if (mudou) { enviarRascunho(); }
-        if ($("lembrar").checked) try { localStorage.setItem(CS, senha); } catch(e) {}
-      });
-    }).catch(function(){});
-  }
-  function slug(t){ return t.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50).replace(/-$/,""); }
+  function slug(t){ return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50).replace(/-$/,""); }
   function esc(s){ return String(s||"").replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function asinDe(link){ var m = link.match(/\/(?:dp|gp\/product|gp\/aw\/d|product)\/([A-Z0-9]{10})/i); return m ? m[1].toUpperCase() : ""; }
+  function ehML(l){ return /^https:\/\/(([a-z0-9-]+\.)*mercadolivre\.com(\.br)?|meli\.la)\//i.test(l); }
   function linkValido(l){ return /^https?:\/\/([a-z0-9-]+\.)*(amazon\.com\.br|amzn\.to|link\.amazon)\//i.test(l) || ehML(l); }
-  function ehML(l){ return /^https:\/\/([a-z0-9-]+\.)*mercadolivre\.com(\.br)?\//i.test(l); }
   function mlInvalido(l){
-    // Termos do ML: nada de página inicial, buscas, categorias ou "ofertas"; nada de encurtadores externos
+    // Termos do ML: nada de página inicial, buscas, categorias ou "ofertas"; nada de encurtadores de outros sites
     try { var u = new URL(l); } catch(e) { return "Link inválido."; }
+    if (u.pathname === "/" || u.pathname === "") return "Esse link é da página inicial. Use o link de um produto.";
     if (/^(lista|listado)\./i.test(u.hostname)) return "Esse é um link de busca/lista. O Mercado Livre não paga por links de busca: gere o link do anúncio do produto.";
-    if (u.pathname === "/" || /^\/(ofertas|categorias|c\/)/i.test(u.pathname)) return "Esse link é da página inicial/ofertas/categorias. Use o link de um produto específico.";
+    if (/^\/(ofertas|categorias|c\/)/i.test(u.pathname)) return "Esse link é de ofertas/categorias. Use o link de um produto específico.";
     return "";
   }
-  function idUnico(base, ignorar){ var id = base || "oferta", n = 2; while (lista.some(function(p,i){ return p.id === id && i !== ignorar; })) id = base + "-" + (n++); return id; }
+  function idUnico(base, ignorarId){ var id = base || "oferta", n = 2; while (lista.some(function(p){ return p.id === id && p.id !== ignorarId; })) id = base + "-" + (n++); return id; }
+  function achar(id){ for (var i = 0; i < lista.length; i++) if (lista[i].id === id) return lista[i]; return null; }
 
   function desenhar(){
-    $("qtd").textContent = lista.length;
-    $("pendente").innerHTML = mudou ? '<span class="alerta">● Há mudanças que ainda não foram publicadas — clique em 🚀 Publicar no site.</span>' : "";
+    var pend = lista.filter(function(p){ return p.oculto; }).length;
+    $("qtd").textContent = (lista.length - pend) + " no site" + (pend ? " · " + pend + " pendente" + (pend > 1 ? "s" : "") : "");
+    $("publicar").style.display = pend ? "" : "none";
+    $("publicar").textContent = "🚀 Publicar pendentes (" + pend + ")";
+    $("pendente").innerHTML = pend ? '<span class="alerta">● ' + pend + ' oferta(s) pendente(s): salvas no servidor, ainda fora do site.</span>' : '<span class="dica">Tudo salvo no servidor ✓ (aparece igual em todos os aparelhos)</span>';
     var cats = {"Ofertas":1}; lista.forEach(function(p){ if (p.categoria) cats[p.categoria]=1; });
-    ["Eletrônicos","Casa e Cozinha","Papelaria","Games","Beleza","Moda","Informática","Celulares","Brinquedos","Ferramentas","Pet Shop","Livros","Esporte e Lazer"].forEach(function(c){cats[c]=1;});
+    ["Eletrônicos","Casa e Cozinha","Papelaria","Games","Beleza","Moda","Informática","Celulares","Brinquedos","Ferramentas","Pet Shop","Livros","Esporte e Lazer","Joias e Relógios"].forEach(function(c){cats[c]=1;});
     $("cats").innerHTML = Object.keys(cats).map(function(c){return '<option value="'+esc(c)+'">';}).join("");
-    $("lista-adm").innerHTML = lista.map(function(p,i){
-      var pub = SP.enderecoSite() + "/p/" + p.id;
+    $("lista-adm").innerHTML = lista.map(function(p){
       var info = (SP.lojaDe(p) === "mercadolivre" ? "🟡 Mercado Livre" : "🟠 Amazon") + " · " + (p.api ? "🔌 API" : "✋ manual");
+      var estado = p.oculto ? '<span class="st st-pend">⏳ Pendente</span>' : '<span class="st st-pub">✅ No site</span>';
       return '<div class="item"><div class="mini-foto">' + (p.imagem ? '<img src="'+esc(p.imagem)+'" referrerpolicy="no-referrer" alt="">' : "🛍️") + "</div>" +
-        '<div class="txt"><b>' + esc(p.titulo) + "</b><small>" + esc(p.categoria||"Ofertas") + " · " + info + (p.destaque?" · ⚡":"") + "</small></div>" +
-        '<div class="acoes"><button class="btn btn-p mini" data-copiar="'+esc(pub)+'">🔗 Link p/ postar</button>' +
-
-        '<button class="btn btn-sec mini" data-ed="'+i+'">Editar</button><button class="btn btn-sec mini" data-del="'+i+'">Apagar</button></div></div>';
+        '<div class="txt"><b>' + esc(p.titulo) + "</b><small>" + estado + esc(p.categoria||"Ofertas") + " · " + info + (p.destaque?" · ⚡":"") + "</small></div>" +
+        '<div class="acoes">' +
+        (p.oculto ? '<button class="btn btn-p mini" data-pub="'+esc(p.id)+'">🚀 Publicar</button>' : '<button class="btn btn-p mini" data-copiar="'+esc(linkPublico(p))+'">🔗 Link p/ postar</button>') +
+        '<button class="btn btn-sec mini" data-ed="'+esc(p.id)+'">Editar</button><button class="btn btn-sec mini" data-del="'+esc(p.id)+'">Apagar</button></div></div>';
     }).join("") || '<p class="dica">Nenhuma oferta ainda.</p>';
   }
   function limpar(){
     $("form").reset(); editando = null; dadosApi = null;
     $("form-titulo").textContent = "Postar oferta"; $("cancelar").style.display = "none";
-    $("previa").style.display = "none"; $("api-msg").textContent = "";
+    $("previa").style.display = "none"; $("api-msg").textContent = ""; $("loja-detectada").textContent = "";
   }
 
   /* ----- buscar na API ----- */
   $("buscar").onclick = function(){
     var link = $("f-link").value.trim(), asin = asinDe(link);
-    if (!asin) { $("api-msg").innerHTML = '<span class="alerta">Não achei o código do produto nesse link.</span> Links curtos amzn.to não trazem o código: use o link completo da página (amazon.com.br/.../dp/XXXXXXXXXX).'; return; }
+    if (!asin) { $("api-msg").innerHTML = '<span class="alerta">Não achei o código do produto nesse link.</span> Links curtos não trazem o código: use o link completo da página (amazon.com.br/.../dp/XXXXXXXXXX).'; return; }
     $("api-msg").textContent = "Buscando…";
     fetch("api/produtos?asins=" + asin).then(function(r){ return r.json(); }).then(function(j){
       var it = j && j.itens && j.itens[0];
       if (!it) { $("api-msg").innerHTML = '<span class="alerta">' + esc((j && j.erro) || "Produto não encontrado.") + "</span> Você pode trocar para o modo manual."; return; }
       dadosApi = it;
       $("f-titulo").value = it.titulo;
-      $("pv-img").src = it.imagem; $("pv-tit").textContent = it.titulo;
-      $("pv-preco").textContent = it.preco ? it.preco + (it.precoAntigo ? " (antes " + it.precoAntigo + ")" : "") : "sem preço no momento";
+      $("pv-img").src = it.imagem; $("pv-tit").textContent = it.titulo; $("pv-preco").textContent = "";
       $("previa").style.display = "flex"; $("api-msg").textContent = "✓ Dados carregados. Agora é só salvar.";
-    }).catch(function(){ $("api-msg").innerHTML = '<span class="alerta">A API não respondeu.</span> Confira as chaves na Cloudflare ou use o modo manual.'; });
+    }).catch(function(){ $("api-msg").innerHTML = '<span class="alerta">A API não respondeu.</span> Use o modo manual.'; });
   };
 
   /* ----- salvar ----- */
   $("f-link").addEventListener("input", function(){
     var l = this.value.trim(), el = $("loja-detectada");
     if (!l) { el.textContent = ""; return; }
-    if (ehML(l)) el.innerHTML = mlInvalido(l) ? '<span class="alerta">' + esc(mlInvalido(l)) + "</span>" : "Loja: <b>Mercado Livre</b> — o link é usado exatamente como você colou.";
+    if (ehML(l)) el.innerHTML = mlInvalido(l) ? '<span class="alerta">' + esc(mlInvalido(l)) + "</span>" : "Loja: <b>Mercado Livre</b> — o link é usado exatamente como você colou. Preencha título e imagem do anúncio.";
     else if (linkValido(l)) el.innerHTML = "Loja: <b>Amazon</b>";
     else el.innerHTML = '<span class="alerta">Link não reconhecido (use link de afiliado da Amazon ou do Mercado Livre).</span>';
   });
+  var pendenteClicado = false;
+  ["salvar","salvar-pend"].forEach(function(id){ $(id).addEventListener("click", function(){ pendenteClicado = this.getAttribute("data-pendente") === "1"; }); });
   $("form").addEventListener("submit", function(e){
     e.preventDefault();
+    if (ocupado) return;
+    var pendente = pendenteClicado; pendenteClicado = false;
     var link = $("f-link").value.trim();
-    if (!linkValido(link)) { alert("Cole um link de afiliado da Amazon Brasil (link.amazon, amzn.to, amazon.com.br) ou do Mercado Livre (mercadolivre.com/sec/... gerado na Central de Afiliados). Não use encurtadores de outros sites."); return; }
+    if (!linkValido(link)) { alert("Cole um link de afiliado da Amazon Brasil (link.amazon, amzn.to, amazon.com.br) ou do Mercado Livre (meli.la/... gerado na Central de Afiliados). Não use encurtadores de outros sites."); return; }
     var ml = ehML(link);
     if (ml && mlInvalido(link)) { alert(mlInvalido(link)); return; }
-    if (ml && modo === "api") { alert("A API serve só para a Amazon. Para Mercado Livre, troque para o modo Manual (título e imagem)."); return; }
+    if (ml && modo === "api") aplicarModo("manual");
     var titulo = $("f-titulo").value.trim();
     var asin = asinDe(link);
-    var antigo = editando !== null ? lista[editando] : {};
+    var antigo = editando ? (achar(editando) || {}) : {};
     var p = { id: "", titulo: titulo };
 
-    if (modo === "api") {
+    if (modo === "api" && !ml) {
       if (!asin) { alert("No modo API use o link completo do produto (com /dp/CÓDIGO)."); return; }
       if (!titulo) { alert("Clique em “Buscar dados na Amazon” primeiro (ou digite um título)."); return; }
       p.asin = asin; p.api = true;
       if (dadosApi && titulo !== dadosApi.titulo) p.tituloFixo = true;
       if (!dadosApi && antigo.tituloFixo) p.tituloFixo = true;
     } else {
-      if (!titulo) { alert("Preencha o título."); return; }
+      if (!titulo) { alert("Preencha o título (copie do anúncio da loja)."); return; }
       if (ml) { p.loja = "mercadolivre"; p.url = link; }
-      else if (asin) p.asin = asin; else p.url = link;
+      else if (asin && !/link\.amazon|amzn\.to/i.test(link)) p.asin = asin; else p.url = link;
       if ($("f-img").value.trim()) p.imagem = $("f-img").value.trim();
-      if (false) {
-        p.preco = $("f-preco").value.trim();
-        if ($("f-antigo").value.trim()) p.precoAntigo = $("f-antigo").value.trim();
-        p.atualizadoEm = (antigo.preco === p.preco && antigo.atualizadoEm) ? antigo.atualizadoEm : new Date().toISOString();
-      }
     }
     p.categoria = $("f-cat").value.trim() || "Ofertas";
     p.destaque = $("f-dest").checked;
-
     if ($("f-cupom").value.trim()) p.cupom = $("f-cupom").value.trim();
     if ($("f-desc").value.trim()) p.descricao = $("f-desc").value.trim();
     p.id = idUnico(slug($("f-id").value || titulo), editando);
     p.data = antigo.data || new Date().toISOString().slice(0,10);
 
-    if (editando !== null) lista[editando] = p; else lista.unshift(p);
-    guardar(); limpar();
-    SP.toast("Oferta salva! Link: /p/" + p.id);
+    var bt = pendente ? $("salvar-pend") : $("salvar"), txt = bt.textContent; bt.disabled = true; bt.textContent = "Salvando…";
+    enviar({ op: "salvar", produto: p, idAntigo: editando, pendente: pendente },
+      pendente ? "💾 Salva como pendente (no servidor)" : "✅ Publicada! Já está no site")
+      .then(function(j){
+        var salvo = j.produtos.filter(function(x){ return x.titulo === p.titulo; })[0] || p;
+        limpar();
+        if (!pendente && navigator.clipboard) navigator.clipboard.writeText(linkPublico(salvo)).then(function(){ SP.toast("✅ Publicada! Link copiado: " + linkPublico(salvo)); }, function(){});
+      }, function(){})
+      .then(function(){ bt.disabled = false; bt.textContent = txt; });
   });
 
   $("cancelar").onclick = limpar;
   $("lista-adm").addEventListener("click", function(e){
     var b = e.target.closest("button"); if (!b) return;
-    var ed = b.getAttribute("data-ed"), del = b.getAttribute("data-del"), pr = b.getAttribute("data-preco");
-    if (pr !== null) {
-      var q = lista[+pr];
-      var novo = prompt("Preço atual de “" + q.titulo + "” (confira na Amazon):", q.preco);
-      if (novo) { q.preco = novo.trim(); q.atualizadoEm = new Date().toISOString(); guardar(); SP.toast("Preço atualizado ✅"); }
-    }
-    if (ed !== null) {
-      var p = lista[+ed]; editando = +ed; dadosApi = null;
+    var ed = b.getAttribute("data-ed"), del = b.getAttribute("data-del"), pub = b.getAttribute("data-pub"), cp = b.getAttribute("data-copiar");
+    // "Link p/ postar" é copiado pelo app.js (data-copiar)
+    if (pub) enviar({ op: "publicar", ids: [pub] }, "✅ Publicada! Já está no site");
+    if (ed) {
+      var p = achar(ed); if (!p) return; editando = ed; dadosApi = null;
       aplicarModo(p.api ? "api" : "manual");
       $("f-link").value = p.asin ? "https://www.amazon.com.br/dp/" + p.asin : (p.url || "");
+      $("f-link").dispatchEvent(new Event("input"));
       $("f-titulo").value = p.titulo || ""; $("f-img").value = p.imagem || "";
-      $("f-preco").value = p.preco || ""; $("f-antigo").value = p.precoAntigo || "";
-      $("f-cat").value = p.categoria || ""; $("f-selo").value = p.selo || ""; $("f-cupom").value = p.cupom || "";
+      $("f-cat").value = p.categoria || ""; $("f-cupom").value = p.cupom || "";
       $("f-desc").value = p.descricao || ""; $("f-id").value = p.id; $("f-dest").checked = !!p.destaque;
       $("form-titulo").textContent = "Editando oferta"; $("cancelar").style.display = "";
+      $("salvar").textContent = p.oculto ? "🚀 Salvar e publicar" : "🚀 Salvar alterações";
       window.scrollTo({ top: $("form").offsetTop - 80, behavior: "smooth" });
     }
-    if (del !== null && confirm("Apagar “" + lista[+del].titulo + "”?")) { lista.splice(+del,1); guardar(); }
+    if (del) { var q = achar(del); if (q && confirm("Apagar “" + q.titulo + "”" + (q.oculto ? "" : " do site") + "?")) enviar({ op: "apagar", id: del }, "🗑️ Oferta apagada"); }
   });
 
   $("baixar").onclick = function(){
     var txt = "/* Cópia das ofertas — " + new Date().toLocaleString("pt-BR") + " */\nwindow.PRODUTOS = " + JSON.stringify(lista, null, 2) + ";\n";
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([txt], { type: "text/javascript" }));
-    a.download = "products.js"; document.body.appendChild(a); a.click(); a.remove();
+    a.download = "copia-ofertas.js"; document.body.appendChild(a); a.click(); a.remove();
   };
-  $("publicar").onclick = function(){
-    var senha = $("senha").value.trim();
-    if (!senha) { sairPainel(""); return; }
-    var bt = this; bt.disabled = true; bt.textContent = "Publicando…";
-    fetch("api/ofertas", { method: "POST", headers: { "Content-Type": "application/json", "x-senha": senha }, body: JSON.stringify(lista) })
-      .then(function(r){ return r.json().then(function(j){ return { s: r.status, j: j }; }); })
-      .then(function(res){
-        if (res.s === 200 && res.j.ok) {
-          try { if ($("lembrar").checked) localStorage.setItem(CS, senha); else localStorage.removeItem(CS); localStorage.setItem(CH + "_p", "0"); localStorage.setItem(CH, JSON.stringify(lista)); } catch(e) {}
-          mudou = false; doSite = JSON.parse(JSON.stringify(lista)); desenhar();
-          fetch("api/rascunho", { method: "DELETE", headers: { "x-senha": senha } }).catch(function(){});
-          SP.toast("✅ Publicado! " + res.j.total + " ofertas no ar");
-        } else {
-          if (res.s === 401) { sairPainel("Senha incorreta ou alterada. Entre de novo."); return; }
-          SP.toast("⚠️ " + (res.j.erro || "Erro ao publicar"));
-        }
-      }).catch(function(){ SP.toast("⚠️ Sem conexão. Tente de novo."); })
-      .then(function(){ bt.disabled = false; bt.textContent = "🚀 Publicar no site"; });
-  };
-  $("restaurar").onclick = function(){
-    if (!confirm("Descartar as mudanças deste aparelho e voltar ao que está publicado no site?")) return;
-    try { localStorage.removeItem(CH); localStorage.removeItem(CH + "_p"); localStorage.removeItem(CH + "_t"); } catch(e){}
-    if (senhaAtual()) fetch("api/rascunho", { method: "DELETE", headers: { "x-senha": senhaAtual() } }).catch(function(){});
-    mudou = false; lista = JSON.parse(JSON.stringify(doSite)); desenhar(); limpar();
-    carregarDoSite(true);
-  };
+  $("publicar").onclick = function(){ enviar({ op: "publicar" }, "✅ Pendentes publicadas! Já estão no site"); };
+  $("atualizar").onclick = function(){ carregar().then(function(){ SP.toast("↻ Lista atualizada"); }); };
+  // ao voltar para esta aba/app, busca o que foi feito em outros aparelhos
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden && !ocupado && editando === null) carregar(true); });
+
   function sairPainel(msg){
     try { localStorage.removeItem(CS); } catch(e) {}
-    $("senha").value = ""; document.body.classList.remove("logado");
+    $("senha").value = ""; document.body.classList.remove("logado"); lista = []; desenhar();
     $("login-erro").textContent = msg || ""; $("login-senha").value = ""; setTimeout(function(){ $("login-senha").focus(); }, 50);
   }
   $("form-login").addEventListener("submit", function(e){
     e.preventDefault();
     var s = $("login-senha").value.trim(); if (!s) return;
     var bt = $("login-entrar"); bt.disabled = true; bt.textContent = "Entrando…"; $("login-erro").textContent = "";
-    fetch("api/rascunho", { headers: { "x-senha": s }, cache: "no-store" }).then(function(r){
+    fetch("api/ofertas?todos=1", { headers: { "x-senha": s }, cache: "no-store" }).then(function(r){
       if (r.status === 401) { $("login-erro").textContent = "Senha incorreta"; return; }
-      if (!r.ok && r.status !== 404) { $("login-erro").textContent = "Erro no servidor (" + r.status + "). Tente de novo."; return; }
-      try { localStorage.setItem(CS, s); } catch(e) {}
-      $("senha").value = s; document.body.classList.add("logado");
-      SP.toast("✅ Conectado! Não precisa mais digitar a senha neste aparelho");
-      buscarRascunho();
+      if (!r.ok) { $("login-erro").textContent = "Erro no servidor (" + r.status + "). Tente de novo."; return; }
+      return r.json().then(function(j){
+        try { localStorage.setItem(CS, s); } catch(e) {}
+        $("senha").value = s; document.body.classList.add("logado");
+        lista = j.produtos || []; desenhar();
+        SP.toast("✅ Conectado! Não precisa mais digitar a senha neste aparelho");
+      });
     }).catch(function(){ $("login-erro").textContent = "Sem conexão. Tente de novo."; })
       .then(function(){ bt.disabled = false; bt.textContent = "Entrar"; });
   });
   $("sair").onclick = function(){ if (confirm("Desconectar este aparelho do painel?")) sairPainel(""); };
-  if ($("senha").value) document.body.classList.add("logado"); else setTimeout(function(){ $("login-senha").focus(); }, 100);
   desenhar();
-  carregarDoSite(false).then(buscarRascunho);
+  if (senhaAtual()) { document.body.classList.add("logado"); carregar(); } else setTimeout(function(){ $("login-senha").focus(); }, 100);
 })();
 </script>
 </body>
